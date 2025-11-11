@@ -1,0 +1,8 @@
+
+{
+  "version": "0.2.3",
+  "notes": "Bugfixes and QoL improvements.",
+  "published": "2025-11-10",
+  "installer_url": "https://your-site.example.com/anime-va/Anime VA Database Setup 0.2.3.exe",
+  "sha256": "optional-sha256-hex"
+}
