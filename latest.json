@@ -2,5 +2,6 @@
   "version": "0.2.2",
   "notes": "Added automatic updater and fixed Meta sheet validation bug.",
   "installer_url": "https://github.com/cjw525/anime-va-updates/releases/download/v0.2.2/Anime.VA.Setup.0.2.2.exe",
-  "sha256": "EC9CEB2D803BE9CF6AC55D35B16CF171B65EA8310CB6491DBC9887AAF33770BC"
+  "sha256": "ec9ceb2d803be9cf6ac55d35b16cf171b65ea8310cb6491dbc9887aaf33770bc"
 }
+
