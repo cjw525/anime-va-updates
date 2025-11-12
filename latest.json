@@ -1,8 +1,6 @@
-
 {
-  "version": "0.2.0",
-  "notes": "Bugfixes and QoL improvements.",
-  "published": "2025-11-10",
-  "installer_url": "https://github.com//cjw525/anime-va/raw/main/installers/Anime%20VA%20Database%20Setup%200.2.3.exe",
-  "sha256": "5926DAFB185D3E8C5C3B9227E2F57CA2B4AA7B841F0D6B4AA71E22E5B4BB14E1"
+  "version": "0.2.2",
+  "notes": "Added automatic updater and fixed Meta sheet validation bug.",
+  "installer_url": "https://github.com/cjw525/anime-va-updates/releases/download/v0.2.2/Anime.VA.Setup.0.2.2.exe",
+  "sha256": "EC9CEB2D803BE9CF6AC55D35B16CF171B65EA8310CB6491DBC9887AAF33770BC"
 }
