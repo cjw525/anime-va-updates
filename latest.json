@@ -1,7 +1,11 @@
 {
-  "version": "0.2.2",
-  "notes": "Added automatic updater and fixed Meta sheet validation bug.",
-  "installer_url": "https://github.com/cjw525/anime-va-updates/releases/download/v0.2.2/Anime.VA.Setup.0.2.2.exe",
-  "sha256": "ec9ceb2d803be9cf6ac55d35b16cf171b65ea8310cb6491dbc9887aaf33770bc"
+  "version": "0.2.3",
+  "notes": [
+    "Update UI layout for maximized windows",
+    "Improved status bar; she's cute AND informative",
+    "Better image handling and pane resizing behavior",
+  ]
+  "installer_url": "https://github.com/cjw525/anime-va-updates/releases/download/0.2.3/Anime.VA.Setup.0.2.3.exe",
+  "sha256": "444A8BCCD75D351B4C3EA056C72A9E625A89A451F614A62F7F0ECC2EFEE59986"
 }
 
