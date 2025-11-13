@@ -3,8 +3,8 @@
   "notes": [
     "Update UI layout for maximized windows",
     "Improved status bar; she's cute AND informative",
-    "Better image handling and pane resizing behavior",
-  ]
+    "Better image handling and pane resizing behavior"
+  ],
   "installer_url": "https://github.com/cjw525/anime-va-updates/releases/download/0.2.3/Anime.VA.Setup.0.2.3.exe",
   "sha256": "444A8BCCD75D351B4C3EA056C72A9E625A89A451F614A62F7F0ECC2EFEE59986"
 }
