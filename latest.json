@@ -1,11 +1,10 @@
 {
-  "version": "0.3.1",
+  "version": "0.3.2",
   "notes": [
-    "Added compare tab with compare shows and compare va functionality",
-    "Added debug image filters",
-    "fix status icons"
-  ],
-  "installer_url": "https://github.com/cjw525/anime-va-updates/releases/download/0.3.1/Anime.VA.Setup.0.3.1.exe",
-  "sha256": "007DCEBB9DE038526AF68096C75E176568BF3F3B1CFCA5264AF9DFA152297461"
+    "Added dev mode",
+    "updated status bar",
+    "added year filter"
+  ]
+  "url": "https://github.com/cjw525/anime-va-updates/releases/download/0.3.2/Anime.VA.Setup.0.3.2.exe",
+  "sha256": "5AE0AEA2B61A7D4C7A17554C559D60A486DD0A0663A864E8C9029669CEB24CBB"
 }
-
