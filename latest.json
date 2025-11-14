@@ -1,11 +1,10 @@
 {
-  "version": "0.2.3",
+  "version": "0.3.0",
   "notes": [
-    "Update UI layout for maximized windows",
-    "Improved status bar; she's cute AND informative",
-    "Better image handling and pane resizing behavior"
+    "Added compare tab with compare shows and compare va functionality",
+    "Added debug image filters"
   ],
-  "installer_url": "https://github.com/cjw525/anime-va-updates/releases/download/0.2.3/Anime.VA.Setup.0.2.3.exe",
-  "sha256": "444A8BCCD75D351B4C3EA056C72A9E625A89A451F614A62F7F0ECC2EFEE59986"
+  "installer_url": "https://github.com/cjw525/anime-va-updates/releases/download/0.3.0/Anime.VA.Setup.0.3.0.exe",
+  "sha256": "35D67CAA5146CCE2EFB6C7B30F28292B1D8D9DD99EC3AF2EB58CF5AD85D0F014"
 }
 
