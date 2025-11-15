@@ -1,1 +1,3 @@
-put some release notes in here
+Test release 0.3.3
+- Automated version bump
+- Testing full New-AVRelease pipeline
