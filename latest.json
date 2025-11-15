@@ -1,8 +1,8 @@
-{
-  "version": "0.3.2",
-  "latest_version": "0.3.2",
-  "notes": "Added dev mode; updated status bar; added year filter.",
-  "installer_url": "https://github.com/cjw525/anime-va-updates/releases/download/0.3.2/Anime.VA.Setup.0.3.2.exe",
-  "url": "https://github.com/cjw525/anime-va-updates/releases/download/0.3.2/Anime.VA.Setup.0.3.2.exe",
-  "sha256": "5AE0AEA2B61A7D4C7A17554C559D60A486DD0A0663A864E8C9029669CEB24CBB"
+﻿{
+    "version":  "0.3.4",
+    "notes":  "Test release 0.3.4\r\n- Automated version bump\r\n- Testing full New-AVRelease pipeline",
+    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.3.4/Anime.VA.Setup.0.3.4.exe",
+    "sha256":  "13123DF0EEF3FF5A0B3D238B25EA1FFC70D2741BD5629981EFB2B690355BCB5D",
+    "latest_version":  "0.3.4",
+    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.3.4/Anime.VA.Setup.0.3.4.exe"
 }
