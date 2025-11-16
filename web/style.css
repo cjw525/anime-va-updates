@@ -1,0 +1,38 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #1e1e1e;
+  color: #f2f2f2;
+}
+
+header {
+  padding: 1rem;
+  background: #292929;
+  position: sticky;
+  top: 0;
+}
+
+h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.4rem;
+}
+
+#search {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+}
+
+#results {
+  padding: 1rem;
+}
+
+.result {
+  padding: 0.7rem;
+  margin-bottom: 0.6rem;
+  background: #333;
+  border-radius: 6px;
+}
