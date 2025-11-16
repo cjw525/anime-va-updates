@@ -1,4 +1,4 @@
-Test release 0.3.5
-- Automated version bump
-- Testing full New-AVRelease pipeline
-- Really making extra sure it works pls and thnks
+Test release 0.3.6
+- clear all function
+- both image filter
+- testing restart on update
