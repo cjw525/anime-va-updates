@@ -8,6 +8,17 @@ async function loadData() {
   renderList(records);
 }
 
+function getImageUrl(record) {
+  // Prefer character image, fall back to VA image
+  if (record.characterImage) {
+    return "images/" + record.characterImage;
+  }
+  if (record.voiceActorImage) {
+    return "images/" + record.voiceActorImage;
+  }
+  return null;
+}
+
 function renderList(list) {
   const container = document.getElementById("results");
 
@@ -16,12 +27,24 @@ function renderList(list) {
     return;
   }
 
-  container.innerHTML = list.map(r => `
-    <div class="result">
-      <strong>${r.character}</strong> — ${r.voiceActor}<br>
-      <em>${r.anime}</em>
-    </div>
-  `).join("");
+  container.innerHTML = list.map(r => {
+    const imgUrl = getImageUrl(r);
+    const imgHtml = imgUrl
+      ? `<img class="thumb" src="${imgUrl}" alt="${r.character || r.voiceActor}">`
+      : "";
+
+    return `
+      <div class="result">
+        <div class="result-main">
+          ${imgHtml}
+          <div class="result-text">
+            <strong>${r.character}</strong> — ${r.voiceActor}<br>
+            <em>${r.anime}</em>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
 }
 
 function setupSearch() {
