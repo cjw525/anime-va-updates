@@ -1,23 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Anime VA Mobile</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <meta name="theme-color" content="#1e1e1e">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="style.css">
-</head>
 <body>
-
-  <header>
-    <h1>Anime VA Database</h1>
-    <input type="text" id="search" placeholder="Search characters, VAs, shows...">
+  <header class="app-header">
+    <h1>Anime VA Directory (Mobile)</h1>
+    <p class="subtitle">Search, filter, and browse your database on the go.</p>
   </header>
 
-  <main id="results">Loading...</main>
+  <main class="app-main">
+    <!-- Controls -->
+    <section class="controls">
+      <div class="control-row">
+        <label for="searchInput">Search</label>
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Anime, character, or VA name..."
+        />
+      </div>
+
+      <div class="control-row">
+        <div class="control-group">
+          <label for="seenFilter">Seen status</label>
+          <select id="seenFilter">
+            <option value="all">All</option>
+            <option value="seen">Seen</option>
+            <option value="unseen">Unseen</option>
+            <option value="planning">Planning / On-Hold</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="typeFilter">Media type</label>
+          <select id="typeFilter">
+            <option value="all">All</option>
+            <option value="tv">TV</option>
+            <option value="movie">Movie</option>
+            <option value="ova">OVA</option>
+            <option value="ona">ONA</option>
+            <option value="special">Special</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-row">
+        <div class="control-group checkbox-group">
+          <input id="hasImageFilter" type="checkbox" />
+          <label for="hasImageFilter">Only entries with images</label>
+        </div>
+
+        <div class="control-group">
+          <label for="sortSelect">Sort by</label>
+          <select id="sortSelect">
+            <option value="anime">Anime title (A–Z)</option>
+            <option value="character">Character name (A–Z)</option>
+            <option value="va">VA name (A–Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-row buttons-row">
+        <button id="showAllBtn" type="button">Show All (keep filters)</button>
+        <button id="clearAllBtn" type="button" class="secondary">Clear All Filters</button>
+      </div>
+
+      <div class="control-row">
+        <p id="resultsSummary" class="summary-text"></p>
+      </div>
+    </section>
+
+    <!-- Cards -->
+    <section id="cardsContainer" class="cards-container">
+      <!-- Cards will render here via JS -->
+    </section>
+  </main>
 
   <script src="app.js"></script>
 </body>
-</html>

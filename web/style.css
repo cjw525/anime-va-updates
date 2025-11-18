@@ -54,3 +54,178 @@ h1 {
 .result-text {
   flex: 1;
 }
+
+/* === New layout + controls for the PWA search/filter UI === */
+
+.app-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #333;
+  background: #292929;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: #b0b0c0;
+}
+
+.app-main {
+  padding: 0.75rem 1.25rem 1.25rem;
+}
+
+.controls {
+  margin-bottom: 0.75rem;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  background: #181825;
+  border: 1px solid #26263a;
+}
+
+.control-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  flex: 1 1 0;
+}
+
+.control-group label {
+  font-size: 0.75rem;
+  margin-bottom: 0.1rem;
+  color: #c0c0d8;
+}
+
+.control-row input[type="text"],
+.control-row select {
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #33334a;
+  background: #10101a;
+  color: #f2f2f2;
+  font-size: 0.85rem;
+}
+
+.control-row input[type="text"]:focus,
+.control-row select:focus {
+  outline: none;
+  border-color: #ff8dcf;
+  box-shadow: 0 0 0 1px #ff8dcf44;
+}
+
+.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 0 0 auto;
+}
+
+.checkbox-group label {
+  margin-bottom: 0;
+}
+
+.buttons-row {
+  justify-content: flex-start;
+}
+
+button {
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid #ff8dcf;
+  background: #ff8dcf22;
+  color: #ffebff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+button.secondary {
+  border-color: #6666aa;
+  background: #2a2a50;
+}
+
+button:hover {
+  filter: brightness(1.1);
+}
+
+.summary-text {
+  font-size: 0.8rem;
+  color: #b0b0c0;
+}
+
+/* Cards */
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.card {
+  background: #181825;
+  border-radius: 0.9rem;
+  padding: 0.5rem;
+  border: 1px solid #26263a;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.card img {
+  width: 100%;
+  border-radius: 0.75rem;
+  object-fit: cover;
+  max-height: 260px;
+}
+
+.card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.card-subtitle {
+  font-size: 0.8rem;
+  color: #c0c0d8;
+}
+
+.card-meta {
+  font-size: 0.75rem;
+  color: #a0a0c0;
+}
+
+.card-tags {
+  font-size: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.tag {
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid #3a3a5a;
+  background: #202036;
+}
+
+.badge-seen {
+  border-color: #4caf50;
+  color: #c1f3c5;
+}
+
+.badge-unseen {
+  border-color: #f44336;
+  color: #ffc9c4;
+}
+
+.badge-planning {
+  border-color: #ffc107;
+  color: #ffeab3;
+}
