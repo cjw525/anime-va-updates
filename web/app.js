@@ -300,17 +300,19 @@ async function loadData() {
     const resp = await fetch("../data/anime_va_mobile.json", { cache: "no-store" });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
-    // Expecting either an array, or { entries: [...] }
-    allEntries = Array.isArray(data) ? data : data.entries || [];
+
+    allEntries = Array.isArray(data)
+      ? data
+      : data.entries || data.data || [];
+
     filteredEntries = [...allEntries];
+
     renderCards();
     updateSummary();
   } catch (err) {
-    console.error("Failed to load anime_va_mobile.json", err);
-    const container = document.getElementById("cardsContainer");
-    if (container) {
-      container.innerHTML = "<p class='summary-text'>Error loading data. Check console.</p>";
-    }
+    console.error("Failed to load JSON:", err);
+    document.getElementById("cardsContainer").innerHTML =
+      "<p class='summary-text'>Error loading data.</p>";
   }
 }
 
