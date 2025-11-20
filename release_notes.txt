@@ -1,4 +1,3 @@
-Test release 0.3.6
-- clear all function
-- both image filter
-- testing restart on update
+Test release 0.3.7
+- icon update
+- straight up I think that's it lmao
