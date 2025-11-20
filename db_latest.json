@@ -1,6 +1,6 @@
 ﻿{
-    "db_version":  "2025-11-15",
+    "db_version":  "2025-11-19",
     "notes":  "-first offical db upload",
-    "db_url":  "https://github.com/cjw525/anime-va-updates/releases/download/db-2025-11-15/anime_va.db",
-    "sha256":  "9DD60C8E02677C485B9CDA4AB20C284278C12EA86F27FBD613B83628D44202C7"
+    "db_url":  "https://github.com/cjw525/anime-va-updates/releases/download/db-2025-11-19/anime_va.db",
+    "sha256":  "E3790EB86F57F7BED9B58A3C2B5E31B84C51B8E087A7D7CC86DE498C9E87FCD4"
 }
