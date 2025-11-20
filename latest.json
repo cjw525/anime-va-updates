@@ -1,8 +1,8 @@
 ﻿{
-    "version":  "0.3.6",
-    "notes":  "Test release 0.3.6\r\n- clear all function\r\n- both image filter\r\n- testing restart on update",
-    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.3.6/Anime.VA.Setup.0.3.6.exe",
-    "sha256":  "EAFC47CD771CE3282310243E89B6E9EDA6464C06403ACD9DA52876084B48702E",
-    "latest_version":  "0.3.6",
-    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.3.6/Anime.VA.Setup.0.3.6.exe"
+    "version":  "0.3.7",
+    "notes":  "Test release 0.3.7\r\n- icon update\r\n- straight up I think that\u0027s it lmao",
+    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.3.7/Anime.VA.Setup.0.3.7.exe",
+    "sha256":  "7FFCF767497B13DF4462CC5F9FB99E77EFDED216784A82EB248BC953ABE2B660",
+    "latest_version":  "0.3.7",
+    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.3.7/Anime.VA.Setup.0.3.7.exe"
 }
