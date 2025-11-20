@@ -1,9 +1,10 @@
-// app.js
+// app.js - table-style list + click-to-view images
 
 let allEntries = [];
 let filteredEntries = [];
+let selectedEntryId = null;
 
-// Utility: safely pull fields no matter what you named them
+// Utility: safely pull fields
 function getField(entry, possibleKeys, fallback = "") {
   for (const key of possibleKeys) {
     if (entry[key] !== undefined && entry[key] !== null) {
@@ -14,7 +15,6 @@ function getField(entry, possibleKeys, fallback = "") {
 }
 
 // Our JSON uses a boolean "seen" field.
-// Normalize to one of: "seen", "unseen", "".
 function normalizeSeen(valueRaw) {
   if (valueRaw === true || valueRaw === "true") return "seen";
   if (valueRaw === false || valueRaw === "false") return "unseen";
@@ -27,45 +27,39 @@ function normalizeSeen(valueRaw) {
   return "";
 }
 
-// We don't currently store media type in the mobile JSON,
-// so this just returns "" for now. Type filter will effectively
-// behave like "All" until we add that data.
+// No media type in mobile JSON yet; leave this as a stub.
 function normalizeType(valueRaw) {
   return "";
 }
 
-function hasImage(entry) {
-  const candidates = [
-    "characterImage",
-    "voiceActorImage",
-    "image_url",
-    "imageUrl",
-    "image",
-    "image_path",
-    "imagePath"
-  ];
-  const val = getField(entry, candidates, "").trim();
-  return val.length > 0;
+// Character image URL
+function getCharacterImageUrl(entry) {
+  const raw = getField(entry, ["characterImage"], "").trim();
+  if (!raw) return "";
+  if (
+    raw.startsWith("http://") ||
+    raw.startsWith("https://") ||
+    raw.startsWith("./") ||
+    raw.startsWith("../")
+  ) {
+    return raw;
+  }
+  return `images/${raw}`;
 }
 
-function getImageUrl(entry) {
-  const candidates = [
-    "characterImage",
-    "voiceActorImage",
-    "image_url",
-    "imageUrl",
-    "image",
-    "image_path",
-    "imagePath"
-  ];
-  const val = getField(entry, candidates, "").trim();
-  if (!val) return "";
-
-  // Mobile JSON stores filenames; images live in web/images/.
-  if (val.startsWith("http://") || val.startsWith("https://") || val.startsWith("./") || val.startsWith("../")) {
-    return val;
+// VA image URL
+function getVaImageUrl(entry) {
+  const raw = getField(entry, ["voiceActorImage"], "").trim();
+  if (!raw) return "";
+  if (
+    raw.startsWith("http://") ||
+    raw.startsWith("https://") ||
+    raw.startsWith("./") ||
+    raw.startsWith("../")
+  ) {
+    return raw;
   }
-  return `images/${val}`;
+  return `images/${raw}`;
 }
 
 function applyFilters() {
@@ -83,53 +77,54 @@ function applyFilters() {
 
   let results = [...allEntries];
 
-  // --- Search ---
+  // Search across anime, character, VA
   if (q) {
-    results = results.filter(entry => {
-      const anime = getField(entry, ["anime_title", "anime", "show", "series"]);
-      const character = getField(entry, ["character_name", "character", "char"]);
-      const va = getField(entry, ["va_name", "voiceActor", "voice_actor", "va"]);
+    results = results.filter((entry) => {
+      const anime = getField(entry, ["anime"]);
+      const character = getField(entry, ["character"]);
+      const va = getField(entry, ["voiceActor", "voice_actor", "va"]);
       const haystack = `${anime} ${character} ${va}`.toLowerCase();
       return haystack.includes(q);
     });
   }
 
-  // --- Seen filter ---
+  // Seen filter
   if (seenVal !== "all") {
-    results = results.filter(entry => {
-      const raw = entry["seen"]; // boolean in our JSON
+    results = results.filter((entry) => {
+      const raw = entry["seen"];
       return normalizeSeen(raw) === seenVal;
     });
   }
 
-  // --- Media type filter ---
-  // No type data yet, so skip filtering here for now.
+  // Type filter: no-op for now because mobile JSON has no type
   if (false && typeVal !== "all") {
-    results = results.filter(entry => {
+    results = results.filter((entry) => {
       const raw = getField(entry, ["media_type", "type", "format"]);
       return normalizeType(raw) === typeVal;
     });
   }
 
-  // --- Has image ---
+  // Only entries that have at least one image
   if (onlyWithImage) {
-    results = results.filter(entry => hasImage(entry));
+    results = results.filter((entry) => {
+      return !!(getCharacterImageUrl(entry) || getVaImageUrl(entry));
+    });
   }
 
-  // --- Sort ---
+  // Sort
   results.sort((a, b) => {
     let aKey = "";
     let bKey = "";
 
     if (sortBy === "anime") {
-      aKey = getField(a, ["anime_title", "anime", "show", "series"]);
-      bKey = getField(b, ["anime_title", "anime", "show", "series"]);
+      aKey = getField(a, ["anime"]);
+      bKey = getField(b, ["anime"]);
     } else if (sortBy === "character") {
-      aKey = getField(a, ["character_name", "character", "char"]);
-      bKey = getField(b, ["character_name", "character", "char"]);
+      aKey = getField(a, ["character"]);
+      bKey = getField(b, ["character"]);
     } else if (sortBy === "va") {
-      aKey = getField(a, ["va_name", "voiceActor", "voice_actor", "va"]);
-      bKey = getField(b, ["va_name", "voiceActor", "voice_actor", "va"]);
+      aKey = getField(a, ["voiceActor", "voice_actor", "va"]);
+      bKey = getField(b, ["voiceActor", "voice_actor", "va"]);
     }
 
     aKey = aKey.toLowerCase();
@@ -138,8 +133,11 @@ function applyFilters() {
   });
 
   filteredEntries = results;
-  renderCards();
+  // Clear selection when filters change
+  selectedEntryId = null;
+  renderList();
   updateSummary();
+  clearDetailPanelIfNeeded();
 }
 
 function updateSummary() {
@@ -152,123 +150,203 @@ function updateSummary() {
   if (!total) {
     summary.textContent = "Loading database...";
   } else if (!shown) {
-    summary.textContent = `Database loaded (${total} entries). Type in the search box or use filters to see results.`;
+    summary.textContent =
+      "Database loaded. Type in the search box or use filters to see entries.";
   } else {
     summary.textContent = `Showing ${shown} of ${total} entries.`;
   }
 }
 
-function renderCards() {
+function renderList() {
   const container = document.getElementById("cardsContainer");
   if (!container) return;
 
   container.innerHTML = "";
 
   if (!filteredEntries.length) {
-    const empty = document.createElement("p");
-    empty.textContent = "No entries match your filters.";
-    empty.className = "summary-text";
-    container.appendChild(empty);
+    const msg = document.createElement("p");
+    msg.className = "summary-text";
+    msg.textContent =
+      "No entries match your filters yet. Try searching or adjusting filters.";
+    container.appendChild(msg);
     return;
   }
 
   for (const entry of filteredEntries) {
-    const anime = getField(entry, ["anime_title", "anime", "show", "series"], "Unknown anime");
-    const character = getField(entry, ["character_name", "character", "char"], "Unknown character");
-    const va = getField(entry, ["va_name", "voiceActor", "voice_actor", "va"], "Unknown VA");
-    const notes = getField(entry, ["notes", "note", "comments"], "");
+    const anime = getField(entry, ["anime"], "Unknown anime");
+    const character = getField(entry, ["character"], "Unknown character");
+    const va = getField(entry, ["voiceActor", "voice_actor", "va"], "Unknown VA");
     const seenRaw = entry["seen"];
     const seenNorm = normalizeSeen(seenRaw);
-    const typeRaw = getField(entry, ["media_type", "type", "format"], "");
-    const typeNorm = normalizeType(typeRaw);
+    const year = getField(entry, ["year"], "");
 
-    const card = document.createElement("article");
-    card.className = "card";
-
-    const imgUrl = getImageUrl(entry);
-    if (imgUrl) {
-      const img = document.createElement("img");
-      img.src = imgUrl;
-      img.alt = `${character} (${anime})`;
-      img.loading = "lazy";  // <-- only load when scrolled into view
-      card.appendChild(img);
+    const row = document.createElement("div");
+    row.className = "result-row";
+    if (entry.id === selectedEntryId) {
+      row.classList.add("selected");
     }
 
+    // main line: Character — Anime
+    const main = document.createElement("div");
+    main.className = "result-main";
 
-    const title = document.createElement("div");
-    title.className = "card-title";
-    title.textContent = character;
-    card.appendChild(title);
+    const titleSpan = document.createElement("span");
+    titleSpan.className = "result-title";
+    titleSpan.textContent = character;
 
-    const subtitle = document.createElement("div");
-    subtitle.className = "card-subtitle";
-    subtitle.textContent = anime;
-    card.appendChild(subtitle);
+    const animeSpan = document.createElement("span");
+    animeSpan.className = "result-anime";
+    animeSpan.textContent = anime + (year ? ` (${year})` : "");
 
+    main.appendChild(titleSpan);
+    main.appendChild(document.createElement("br"));
+    main.appendChild(animeSpan);
+
+    // meta: VA + Seen
     const meta = document.createElement("div");
-    meta.className = "card-meta";
+    meta.className = "result-meta";
     meta.textContent = `VA: ${va}`;
-    card.appendChild(meta);
 
     const tags = document.createElement("div");
-    tags.className = "card-tags";
+    tags.className = "result-tags";
 
     if (seenNorm) {
-      const seenTag = document.createElement("span");
-      seenTag.className = "tag";
-      if (seenNorm === "seen") seenTag.classList.add("badge-seen");
-      if (seenNorm === "unseen") seenTag.classList.add("badge-unseen");
-      if (seenNorm === "planning") seenTag.classList.add("badge-planning");
-      seenTag.textContent =
-        seenNorm === "seen" ? "Seen" :
-        seenNorm === "unseen" ? "Unseen" :
-        "Planning";
-      tags.appendChild(seenTag);
+      const seenBadge = document.createElement("span");
+      seenBadge.className = "tag";
+      if (seenNorm === "seen") seenBadge.classList.add("badge-seen");
+      if (seenNorm === "unseen") seenBadge.classList.add("badge-unseen");
+      if (seenNorm === "planning") seenBadge.classList.add("badge-planning");
+
+      seenBadge.textContent =
+        seenNorm === "seen"
+          ? "Seen"
+          : seenNorm === "unseen"
+          ? "Unseen"
+          : "Planning";
+      tags.appendChild(seenBadge);
     }
 
-    if (typeRaw) {
-      const t = document.createElement("span");
-      t.className = "tag";
-      t.textContent = typeRaw;
-      tags.appendChild(t);
-    }
-
-    if (notes) {
-      const n = document.createElement("span");
-      n.className = "tag";
-      n.textContent = "Has notes";
-      tags.appendChild(n);
-    }
-
+    row.appendChild(main);
+    row.appendChild(meta);
     if (tags.childElementCount > 0) {
-      card.appendChild(tags);
+      row.appendChild(tags);
     }
 
-    if (notes) {
-      const notesToggle = document.createElement("button");
-      notesToggle.type = "button";
-      notesToggle.textContent = "Show notes";
-      notesToggle.className = "secondary";
-      notesToggle.style.marginTop = "0.25rem";
+    row.addEventListener("click", () => {
+      selectEntry(entry);
+    });
 
-      const notesBlock = document.createElement("div");
-      notesBlock.style.display = "none";
-      notesBlock.style.fontSize = "0.75rem";
-      notesBlock.style.color = "#d4d4ff";
-      notesBlock.style.marginTop = "0.25rem";
-      notesBlock.textContent = notes;
+    container.appendChild(row);
+  }
+}
 
-      notesToggle.addEventListener("click", () => {
-        const open = notesBlock.style.display === "block";
-        notesBlock.display = open ? "none" : "block";
-        notesToggle.textContent = open ? "Show notes" : "Hide notes";
-      });
+function clearDetailPanelIfNeeded() {
+  if (selectedEntryId !== null) return;
+  const panel = document.getElementById("detailPanel");
+  if (!panel) return;
+  panel.innerHTML =
+    "<p class='summary-text'>Select an entry to see details and images.</p>";
+}
 
-      card.appendChild(notesToggle);
-      card.appendChild(notesBlock);
-    }
+function selectEntry(entry) {
+  selectedEntryId = entry.id;
 
-    container.appendChild(card);
+  // Re-render list so selected row is highlighted
+  renderList();
+
+  const panel = document.getElementById("detailPanel");
+  if (!panel) return;
+
+  const anime = getField(entry, ["anime"], "Unknown anime");
+  const character = getField(entry, ["character"], "Unknown character");
+  const va = getField(entry, ["voiceActor", "voice_actor", "va"], "Unknown VA");
+  const seenRaw = entry["seen"];
+  const seenNorm = normalizeSeen(seenRaw);
+  const year = getField(entry, ["year"], "");
+
+  panel.innerHTML = "";
+
+  const header = document.createElement("div");
+  header.className = "detail-header";
+
+  const title = document.createElement("h2");
+  title.textContent = character;
+  header.appendChild(title);
+
+  const subtitle = document.createElement("p");
+  subtitle.className = "detail-subtitle";
+  subtitle.textContent = anime + (year ? ` (${year})` : "");
+  header.appendChild(subtitle);
+
+  const meta = document.createElement("p");
+  meta.className = "detail-meta";
+  meta.textContent = `VA: ${va}`;
+  header.appendChild(meta);
+
+  if (seenNorm) {
+    const seenInfo = document.createElement("p");
+    seenInfo.className = "detail-meta";
+    seenInfo.textContent =
+      seenNorm === "seen"
+        ? "Status: Seen"
+        : seenNorm === "unseen"
+        ? "Status: Unseen"
+        : "Status: Planning / On-Hold";
+    header.appendChild(seenInfo);
+  }
+
+  panel.appendChild(header);
+
+  // IMAGES – ONLY LOADED FOR THE SELECTED ENTRY
+  const imagesWrapper = document.createElement("div");
+  imagesWrapper.className = "detail-images";
+
+  const charUrl = getCharacterImageUrl(entry);
+  const vaUrl = getVaImageUrl(entry);
+
+  if (charUrl) {
+    const charBlock = document.createElement("div");
+    charBlock.className = "detail-image-block";
+
+    const img = document.createElement("img");
+    img.src = charUrl;
+    img.alt = `Character: ${character}`;
+    img.loading = "lazy";
+
+    const label = document.createElement("div");
+    label.className = "detail-image-label";
+    label.textContent = "Character";
+
+    charBlock.appendChild(img);
+    charBlock.appendChild(label);
+    imagesWrapper.appendChild(charBlock);
+  }
+
+  if (vaUrl) {
+    const vaBlock = document.createElement("div");
+    vaBlock.className = "detail-image-block";
+
+    const img = document.createElement("img");
+    img.src = vaUrl;
+    img.alt = `Voice actor: ${va}`;
+    img.loading = "lazy";
+
+    const label = document.createElement("div");
+    label.className = "detail-image-label";
+    label.textContent = "Voice Actor";
+
+    vaBlock.appendChild(img);
+    vaBlock.appendChild(label);
+    imagesWrapper.appendChild(vaBlock);
+  }
+
+  if (imagesWrapper.childElementCount > 0) {
+    panel.appendChild(imagesWrapper);
+  } else {
+    const noImg = document.createElement("p");
+    noImg.className = "summary-text";
+    noImg.textContent = "No images available for this entry.";
+    panel.appendChild(noImg);
   }
 }
 
@@ -301,7 +379,11 @@ function hookControls() {
       typeFilter.value = "all";
       hasImageFilter.checked = false;
       sortSelect.value = "anime";
-      applyFilters();
+      filteredEntries = [];
+      selectedEntryId = null;
+      renderList();
+      updateSummary();
+      clearDetailPanelIfNeeded();
     });
   }
 }
@@ -312,21 +394,24 @@ async function loadData() {
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
 
-        allEntries = Array.isArray(data) ? data : data.entries || data.data || [];
-    // Start with no cards shown until the user searches / filters
+    // Your JSON is a top-level array of entries
+    allEntries = Array.isArray(data) ? data : data.entries || data.data || [];
     filteredEntries = [];
-    updateSummary();
+    selectedEntryId = null;
 
     const container = document.getElementById("cardsContainer");
     if (container) {
-      container.innerHTML = "<p class='summary-text'>Database loaded. Type in the search box or use filters to see entries.</p>";
+      container.innerHTML =
+        "<p class='summary-text'>Database loaded. Type in the search box or use filters to see entries.</p>";
     }
-
+    clearDetailPanelIfNeeded();
+    updateSummary();
   } catch (err) {
     console.error("Failed to load anime_va_mobile.json", err);
     const container = document.getElementById("cardsContainer");
     if (container) {
-      container.innerHTML = "<p class='summary-text'>Error loading data. Check console.</p>";
+      container.innerHTML =
+        "<p class='summary-text'>Error loading data. Check console.</p>";
     }
   }
 }
