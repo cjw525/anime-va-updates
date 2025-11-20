@@ -145,7 +145,17 @@ function applyFilters() {
 function updateSummary() {
   const summary = document.getElementById("resultsSummary");
   if (!summary) return;
-  summary.textContent = `Showing ${filteredEntries.length} of ${allEntries.length} entries.`;
+
+  const total = allEntries.length;
+  const shown = filteredEntries.length;
+
+  if (!total) {
+    summary.textContent = "Loading database...";
+  } else if (!shown) {
+    summary.textContent = `Database loaded (${total} entries). Type in the search box or use filters to see results.`;
+  } else {
+    summary.textContent = `Showing ${shown} of ${total} entries.`;
+  }
 }
 
 function renderCards() {
@@ -180,8 +190,10 @@ function renderCards() {
       const img = document.createElement("img");
       img.src = imgUrl;
       img.alt = `${character} (${anime})`;
+      img.loading = "lazy";  // <-- only load when scrolled into view
       card.appendChild(img);
     }
+
 
     const title = document.createElement("div");
     title.className = "card-title";
@@ -300,10 +312,16 @@ async function loadData() {
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
 
-    allEntries = Array.isArray(data) ? data : data.entries || data.data || [];
-    filteredEntries = [...allEntries];
-    renderCards();
+        allEntries = Array.isArray(data) ? data : data.entries || data.data || [];
+    // Start with no cards shown until the user searches / filters
+    filteredEntries = [];
     updateSummary();
+
+    const container = document.getElementById("cardsContainer");
+    if (container) {
+      container.innerHTML = "<p class='summary-text'>Database loaded. Type in the search box or use filters to see entries.</p>";
+    }
+
   } catch (err) {
     console.error("Failed to load anime_va_mobile.json", err);
     const container = document.getElementById("cardsContainer");
