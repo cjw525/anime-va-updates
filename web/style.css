@@ -325,15 +325,24 @@ button:hover {
   gap: 0.5rem;
 }
 
+/* Each image gets a consistent portrait-ish box */
 .detail-image-block {
   flex: 1 1 140px;
   max-width: 220px;
+
+  /* new: enforce size + hide overflow */
+  aspect-ratio: 3 / 4;      /* adjust if you like 4/5, 2/3, etc. */
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: #111;
 }
 
+/* Make the image fill the box */
 .detail-image-block img {
   width: 100%;
-  border-radius: 0.75rem;
-  object-fit: cover;
+  height: 100%;
+  display: block;
+  object-fit: cover;        /* crop to fit the box nicely */
 }
 
 .detail-image-label {
