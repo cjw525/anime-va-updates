@@ -1,4 +1,4 @@
-const CACHE_NAME = "anime-va-cache-v8";
+const CACHE_NAME = "anime-va-cache-v9";
 
 const URLS_TO_CACHE = [
   "/anime-va-updates/web/",

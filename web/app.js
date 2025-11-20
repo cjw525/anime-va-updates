@@ -250,19 +250,53 @@ function selectEntry(entry) {
   const header = document.createElement("div");
   header.className = "detail-header";
 
-  const title = document.createElement("h2");
-  title.textContent = character;
-  header.appendChild(title);
+  // Character label block
+  const charLabel = document.createElement("div");
+  charLabel.className = "detail-label-block";
 
-  const subtitle = document.createElement("p");
-  subtitle.className = "detail-subtitle";
-  subtitle.textContent = anime;
-  header.appendChild(subtitle);
+  const charLabelTitle = document.createElement("div");
+  charLabelTitle.className = "detail-label-title";
+  charLabelTitle.textContent = "Character";
 
-  const meta = document.createElement("p");
-  meta.className = "detail-meta";
-  meta.textContent = `VA: ${va}`;
-  header.appendChild(meta);
+  const charValue = document.createElement("div");
+  charValue.className = "detail-label-value";
+  charValue.textContent = character;
+
+  charLabel.appendChild(charLabelTitle);
+  charLabel.appendChild(charValue);
+  header.appendChild(charLabel);
+
+  // Anime label block
+  const animeLabel = document.createElement("div");
+  animeLabel.className = "detail-label-block";
+
+  const animeLabelTitle = document.createElement("div");
+  animeLabelTitle.className = "detail-label-title";
+  animeLabelTitle.textContent = "Anime";
+
+  const animeValue = document.createElement("div");
+  animeValue.className = "detail-label-value";
+  animeValue.textContent = anime;
+
+  animeLabel.appendChild(animeLabelTitle);
+  animeLabel.appendChild(animeValue);
+  header.appendChild(animeLabel);
+
+  // Voice actor label block
+  const vaLabel = document.createElement("div");
+  vaLabel.className = "detail-label-block";
+
+  const vaLabelTitle = document.createElement("div");
+  vaLabelTitle.className = "detail-label-title";
+  vaLabelTitle.textContent = "Voice Actor";
+
+  const vaValue = document.createElement("div");
+  vaValue.className = "detail-label-value";
+  vaValue.textContent = va;
+
+  vaLabel.appendChild(vaLabelTitle);
+  vaLabel.appendChild(vaValue);
+  header.appendChild(vaLabel);
 
   panel.appendChild(header);
 

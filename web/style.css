@@ -351,3 +351,22 @@ button:hover {
   color: #dcdcf5;
   text-align: center;
 }
+
+.detail-label-block {
+  margin-bottom: 0.6rem;
+}
+
+.detail-label-title {
+  font-size: 0.75rem;
+  color: #c0c0d8;
+  margin-bottom: 0.15rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-label-value {
+  font-size: 1rem;
+  color: #f0f0ff;
+  font-weight: 600;
+}
+
