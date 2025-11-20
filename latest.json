@@ -1,8 +1,8 @@
 ﻿{
-    "version":  "0.3.7",
+    "version":  "0.3.8",
     "notes":  "Test release 0.3.7\r\n- icon update\r\n- straight up I think that\u0027s it lmao",
-    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.3.7/Anime.VA.Setup.0.3.7.exe",
-    "sha256":  "7FFCF767497B13DF4462CC5F9FB99E77EFDED216784A82EB248BC953ABE2B660",
-    "latest_version":  "0.3.7",
-    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.3.7/Anime.VA.Setup.0.3.7.exe"
+    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.3.8/Anime.VA.Setup.0.3.8.exe",
+    "sha256":  "615A84C8DFA409517FE347AB25E9F24EF5B217FBC53C026D0D6ED958762B7997",
+    "latest_version":  "0.3.8",
+    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.3.8/Anime.VA.Setup.0.3.8.exe"
 }
