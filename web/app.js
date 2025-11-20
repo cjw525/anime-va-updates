@@ -196,7 +196,7 @@ function renderList() {
 
     const animeSpan = document.createElement("span");
     animeSpan.className = "result-anime";
-    animeSpan.textContent = anime + (year ? ` (${year})` : "");
+    animeSpan.textContent = anime;
 
     main.appendChild(titleSpan);
     main.appendChild(document.createElement("br"));
@@ -210,28 +210,9 @@ function renderList() {
     const tags = document.createElement("div");
     tags.className = "result-tags";
 
-    if (seenNorm) {
-      const seenBadge = document.createElement("span");
-      seenBadge.className = "tag";
-      if (seenNorm === "seen") seenBadge.classList.add("badge-seen");
-      if (seenNorm === "unseen") seenBadge.classList.add("badge-unseen");
-      if (seenNorm === "planning") seenBadge.classList.add("badge-planning");
-
-      seenBadge.textContent =
-        seenNorm === "seen"
-          ? "Seen"
-          : seenNorm === "unseen"
-          ? "Unseen"
-          : "Planning";
-      tags.appendChild(seenBadge);
-    }
-
     row.appendChild(main);
     row.appendChild(meta);
-    if (tags.childElementCount > 0) {
-      row.appendChild(tags);
-    }
-
+    
     row.addEventListener("click", () => {
       selectEntry(entry);
     });
@@ -275,25 +256,13 @@ function selectEntry(entry) {
 
   const subtitle = document.createElement("p");
   subtitle.className = "detail-subtitle";
-  subtitle.textContent = anime + (year ? ` (${year})` : "");
+  subtitle.textContent = anime;
   header.appendChild(subtitle);
 
   const meta = document.createElement("p");
   meta.className = "detail-meta";
   meta.textContent = `VA: ${va}`;
   header.appendChild(meta);
-
-  if (seenNorm) {
-    const seenInfo = document.createElement("p");
-    seenInfo.className = "detail-meta";
-    seenInfo.textContent =
-      seenNorm === "seen"
-        ? "Status: Seen"
-        : seenNorm === "unseen"
-        ? "Status: Unseen"
-        : "Status: Planning / On-Hold";
-    header.appendChild(seenInfo);
-  }
 
   panel.appendChild(header);
 
