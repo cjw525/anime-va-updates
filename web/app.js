@@ -13,7 +13,12 @@ function getField(entry, possibleKeys, fallback = "") {
   return fallback;
 }
 
+// Our JSON uses a boolean "seen" field.
+// Normalize to one of: "seen", "unseen", "".
 function normalizeSeen(valueRaw) {
+  if (valueRaw === true || valueRaw === "true") return "seen";
+  if (valueRaw === false || valueRaw === "false") return "unseen";
+
   const v = (valueRaw || "").toString().toLowerCase();
   if (!v) return "";
   if (v.startsWith("seen") || v === "y" || v === "yes") return "seen";
@@ -22,19 +27,22 @@ function normalizeSeen(valueRaw) {
   return "";
 }
 
+// We don't currently store media type in the mobile JSON,
+// so this just returns "" for now. Type filter will effectively
+// behave like "All" until we add that data.
 function normalizeType(valueRaw) {
-  const v = (valueRaw || "").toString().toLowerCase();
-  if (v.includes("tv")) return "tv";
-  if (v.includes("movie") || v.includes("film")) return "movie";
-  if (v.includes("ova")) return "ova";
-  if (v.includes("ona")) return "ona";
-  if (v.includes("special")) return "special";
   return "";
 }
 
 function hasImage(entry) {
   const candidates = [
-    "image_url", "imageUrl", "image", "image_path", "imagePath"
+    "characterImage",
+    "voiceActorImage",
+    "image_url",
+    "imageUrl",
+    "image",
+    "image_path",
+    "imagePath"
   ];
   const val = getField(entry, candidates, "").trim();
   return val.length > 0;
@@ -42,17 +50,21 @@ function hasImage(entry) {
 
 function getImageUrl(entry) {
   const candidates = [
-    "image_url", "imageUrl", "image", "image_path", "imagePath"
+    "characterImage",
+    "voiceActorImage",
+    "image_url",
+    "imageUrl",
+    "image",
+    "image_path",
+    "imagePath"
   ];
   const val = getField(entry, candidates, "").trim();
   if (!val) return "";
 
-  // If export_mobile_json already gives full URLs, just return it.
-  // If it only stores filenames, you can adjust this to prefix /images/.
+  // Mobile JSON stores filenames; images live in web/images/.
   if (val.startsWith("http://") || val.startsWith("https://") || val.startsWith("./") || val.startsWith("../")) {
     return val;
   }
-  // Assume filename stored, images live in web/images/
   return `images/${val}`;
 }
 
@@ -64,69 +76,65 @@ function applyFilters() {
   const sortSelect = document.getElementById("sortSelect");
 
   const q = (searchInput.value || "").trim().toLowerCase();
-  const seenVal = seenFilter.value;      // all / seen / unseen / planning
-  const typeVal = typeFilter.value;      // all / tv / movie / ova / ona / special
+  const seenVal = seenFilter.value;
+  const typeVal = typeFilter.value;
   const onlyWithImage = hasImageFilter.checked;
-  const sortBy = sortSelect.value;       // anime / character / va
+  const sortBy = sortSelect.value;
 
   let results = [...allEntries];
 
-  // 1) Search filter
+  // --- Search ---
   if (q) {
     results = results.filter(entry => {
-      const anime = getField(entry, ["anime_title", "anime", "show", "series"], "");
-      const character = getField(entry, ["character_name", "character", "char"], "");
-      const va = getField(entry, ["va_name", "voice_actor", "va"], "");
+      const anime = getField(entry, ["anime_title", "anime", "show", "series"]);
+      const character = getField(entry, ["character_name", "character", "char"]);
+      const va = getField(entry, ["va_name", "voiceActor", "voice_actor", "va"]);
       const haystack = `${anime} ${character} ${va}`.toLowerCase();
       return haystack.includes(q);
     });
   }
 
-  // 2) Seen filter
+  // --- Seen filter ---
   if (seenVal !== "all") {
     results = results.filter(entry => {
-      const raw = getField(entry, ["seen", "watch_status", "status"], "");
-      const normalized = normalizeSeen(raw);
-      return normalized === seenVal;
+      const raw = entry["seen"]; // boolean in our JSON
+      return normalizeSeen(raw) === seenVal;
     });
   }
 
-  // 3) Type filter
-  if (typeVal !== "all") {
+  // --- Media type filter ---
+  // No type data yet, so skip filtering here for now.
+  if (false && typeVal !== "all") {
     results = results.filter(entry => {
-      const raw = getField(entry, ["media_type", "type", "format"], "");
-      const normalized = normalizeType(raw);
-      return normalized === typeVal;
+      const raw = getField(entry, ["media_type", "type", "format"]);
+      return normalizeType(raw) === typeVal;
     });
   }
 
-  // 4) Has image filter
+  // --- Has image ---
   if (onlyWithImage) {
     results = results.filter(entry => hasImage(entry));
   }
 
-  // 5) Sort
+  // --- Sort ---
   results.sort((a, b) => {
     let aKey = "";
     let bKey = "";
 
     if (sortBy === "anime") {
-      aKey = getField(a, ["anime_title", "anime", "show", "series"], "");
-      bKey = getField(b, ["anime_title", "anime", "show", "series"], "");
+      aKey = getField(a, ["anime_title", "anime", "show", "series"]);
+      bKey = getField(b, ["anime_title", "anime", "show", "series"]);
     } else if (sortBy === "character") {
-      aKey = getField(a, ["character_name", "character", "char"], "");
-      bKey = getField(b, ["character_name", "character", "char"], "");
+      aKey = getField(a, ["character_name", "character", "char"]);
+      bKey = getField(b, ["character_name", "character", "char"]);
     } else if (sortBy === "va") {
-      aKey = getField(a, ["va_name", "voice_actor", "va"], "");
-      bKey = getField(b, ["va_name", "voice_actor", "va"], "");
+      aKey = getField(a, ["va_name", "voiceActor", "voice_actor", "va"]);
+      bKey = getField(b, ["va_name", "voiceActor", "voice_actor", "va"]);
     }
 
     aKey = aKey.toLowerCase();
     bKey = bKey.toLowerCase();
-
-    if (aKey < bKey) return -1;
-    if (aKey > bKey) return 1;
-    return 0;
+    return aKey.localeCompare(bKey);
   });
 
   filteredEntries = results;
@@ -157,9 +165,9 @@ function renderCards() {
   for (const entry of filteredEntries) {
     const anime = getField(entry, ["anime_title", "anime", "show", "series"], "Unknown anime");
     const character = getField(entry, ["character_name", "character", "char"], "Unknown character");
-    const va = getField(entry, ["va_name", "voice_actor", "va"], "Unknown VA");
+    const va = getField(entry, ["va_name", "voiceActor", "voice_actor", "va"], "Unknown VA");
     const notes = getField(entry, ["notes", "note", "comments"], "");
-    const seenRaw = getField(entry, ["seen", "watch_status", "status"], "");
+    const seenRaw = entry["seen"];
     const seenNorm = normalizeSeen(seenRaw);
     const typeRaw = getField(entry, ["media_type", "type", "format"], "");
     const typeNorm = normalizeType(typeRaw);
@@ -199,7 +207,10 @@ function renderCards() {
       if (seenNorm === "seen") seenTag.classList.add("badge-seen");
       if (seenNorm === "unseen") seenTag.classList.add("badge-unseen");
       if (seenNorm === "planning") seenTag.classList.add("badge-planning");
-      seenTag.textContent = `Seen: ${seenRaw || seenNorm}`;
+      seenTag.textContent =
+        seenNorm === "seen" ? "Seen" :
+        seenNorm === "unseen" ? "Unseen" :
+        "Planning";
       tags.appendChild(seenTag);
     }
 
@@ -221,7 +232,6 @@ function renderCards() {
       card.appendChild(tags);
     }
 
-    // Optional: expand/collapse notes
     if (notes) {
       const notesToggle = document.createElement("button");
       notesToggle.type = "button";
@@ -238,7 +248,7 @@ function renderCards() {
 
       notesToggle.addEventListener("click", () => {
         const open = notesBlock.style.display === "block";
-        notesBlock.style.display = open ? "none" : "block";
+        notesBlock.display = open ? "none" : "block";
         notesToggle.textContent = open ? "Show notes" : "Hide notes";
       });
 
@@ -259,25 +269,14 @@ function hookControls() {
   const showAllBtn = document.getElementById("showAllBtn");
   const clearAllBtn = document.getElementById("clearAllBtn");
 
-  if (searchInput) {
-    searchInput.addEventListener("input", () => applyFilters());
-  }
-  if (seenFilter) {
-    seenFilter.addEventListener("change", () => applyFilters());
-  }
-  if (typeFilter) {
-    typeFilter.addEventListener("change", () => applyFilters());
-  }
-  if (hasImageFilter) {
-    hasImageFilter.addEventListener("change", () => applyFilters());
-  }
-  if (sortSelect) {
-    sortSelect.addEventListener("change", () => applyFilters());
-  }
+  if (searchInput) searchInput.addEventListener("input", applyFilters);
+  if (seenFilter) seenFilter.addEventListener("change", applyFilters);
+  if (typeFilter) typeFilter.addEventListener("change", applyFilters);
+  if (hasImageFilter) hasImageFilter.addEventListener("change", applyFilters);
+  if (sortSelect) sortSelect.addEventListener("change", applyFilters);
 
   if (showAllBtn) {
     showAllBtn.addEventListener("click", () => {
-      // Clear search ONLY, keep filters (like your wife's preferred behavior)
       searchInput.value = "";
       applyFilters();
     });
@@ -301,18 +300,16 @@ async function loadData() {
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
 
-    allEntries = Array.isArray(data)
-      ? data
-      : data.entries || data.data || [];
-
+    allEntries = Array.isArray(data) ? data : data.entries || data.data || [];
     filteredEntries = [...allEntries];
-
     renderCards();
     updateSummary();
   } catch (err) {
-    console.error("Failed to load JSON:", err);
-    document.getElementById("cardsContainer").innerHTML =
-      "<p class='summary-text'>Error loading data.</p>";
+    console.error("Failed to load anime_va_mobile.json", err);
+    const container = document.getElementById("cardsContainer");
+    if (container) {
+      container.innerHTML = "<p class='summary-text'>Error loading data. Check console.</p>";
+    }
   }
 }
 
