@@ -334,7 +334,8 @@ button:hover {
   aspect-ratio: 3 / 4;      /* adjust if you like 4/5, 2/3, etc. */
   overflow: hidden;
   border-radius: 0.75rem;
-  background: hotpink;
+  background: black;
+  border: 8px solid hotpink;  /* debug border - remove or change color */
 }
 
 /* Make the image fill the box */
