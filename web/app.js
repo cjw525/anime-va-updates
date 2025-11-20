@@ -348,6 +348,7 @@ function selectEntry(entry) {
     noImg.textContent = "No images available for this entry.";
     panel.appendChild(noImg);
   }
+  panel.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function hookControls() {
