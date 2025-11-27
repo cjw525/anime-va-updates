@@ -1,1 +1,2 @@
-﻿
+﻿- Fixed Slime 
+- Fixed missing meta sheet names

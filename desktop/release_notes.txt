@@ -1,5 +1,4 @@
-Test release 0.4.0
-- uhhhh many things
-- AnimeListTab added
-- SearchTab general updates
-- probably many other things, sorry
+Release 0.4.1
+- fuzzy search implemented for macrons and shit
+- TBR List on Anime List Tab 
+- Seen filter and TBR filter added to Anime List Tab
