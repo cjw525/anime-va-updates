@@ -1,8 +1,8 @@
 ﻿{
-    "version":  "0.3.8",
-    "notes":  "Test release 0.3.7\r\n- icon update\r\n- straight up I think that\u0027s it lmao",
-    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.3.8/Anime.VA.Setup.0.3.8.exe",
-    "sha256":  "615A84C8DFA409517FE347AB25E9F24EF5B217FBC53C026D0D6ED958762B7997",
-    "latest_version":  "0.3.8",
-    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.3.8/Anime.VA.Setup.0.3.8.exe"
+    "version":  "0.4.0",
+    "notes":  "Test release 0.4.0\r\n- uhhhh many things\r\n- AnimeListTab added\r\n- SearchTab general updates\r\n- probably many other things, sorry",
+    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.0/Anime%20VA%20Setup%200.4.0.exe",
+    "sha256":  "EBF264E975136A966277D68A321AAAC53C2182FF10363686A60788326C081847",
+    "latest_version":  "0.4.0",
+    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.0/Anime%20VA%20Setup%200.4.0.exe"
 }

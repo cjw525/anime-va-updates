@@ -1,3 +1,5 @@
-Test release 0.3.7
-- icon update
-- straight up I think that's it lmao
+Test release 0.4.0
+- uhhhh many things
+- AnimeListTab added
+- SearchTab general updates
+- probably many other things, sorry
