@@ -1,8 +1,8 @@
 ﻿{
-    "version":  "0.4.2",
-    "notes":  "Release 0.4.2\r\n- testing testing 1 2 3\r\n- fix the jpn database image issue",
-    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.2/Anime.VA.Setup.0.4.2.exe",
-    "sha256":  "17FF147D51B4EE11338273C21DCB21CDC0013CE2D99051190B0231FD9CA8544F",
-    "latest_version":  "0.4.2",
-    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.2/Anime.VA.Setup.0.4.2.exe"
+    "version":  "0.4.3",
+    "notes":  "Release 0.4.3\r\n- testing testing 1 2 3\r\n- fix the db database image issue",
+    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.3/Anime.VA.Setup.0.4.3.exe",
+    "sha256":  "86B7F08919C1B00B5CB7320DBF852C1FED7819601FDCF51D08765A4F7221C69B",
+    "latest_version":  "0.4.3",
+    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.3/Anime.VA.Setup.0.4.3.exe"
 }
