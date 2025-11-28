@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Anime VA Directory (Mobile)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- PWA manifest (same path you already use) -->
+    <link rel="manifest" href="manifest.webmanifest" />
+
+    <!-- Our styles -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Anime VA Directory (Mobile)</h1>
+      <p class="subtitle">
+        Search your voice actor database from the couch.
+      </p>
+    </header>
+
+    <main class="app-main">
+      <!-- Language toggle -->
+      <section class="lang-toggle">
+        <button id="langEng" class="lang-btn selected">ENG</button>
+        <button id="langJpn" class="lang-btn">JPN</button>
+        <button id="langBoth" class="lang-btn">Both</button>
+      </section>
+      <!-- Controls -->
+      <section class="controls">
+        <!-- SEARCH -->
+        <div class="control-row">
+          <div class="control-group search-group">
+            <label for="searchInput">Search</label>
+            <div class="search-wrapper">
+              <input
+                id="searchInput"
+                type="text"
+                placeholder="Anime, character, or VA name..."
+              />
+              <div id="searchSuggestions" class="search-suggestions"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="control-row">
+          <div class="control-group">
+            <label for="seenFilter">Seen status</label>
+            <select id="seenFilter">
+              <option value="all">All</option>
+              <option value="seen">Seen</option>
+              <option value="unseen">Unseen</option>
+              <option value="planning">Planning / On-Hold</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="typeFilter">Media type</label>
+            <select id="typeFilter">
+              <option value="all">All</option>
+              <option value="tv">TV</option>
+              <option value="movie">Movie</option>
+              <option value="ova">OVA</option>
+              <option value="ona">ONA</option>
+              <option value="special">Special</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <div class="control-group checkbox-group">
+            <input id="hasImageFilter" type="checkbox" />
+            <label for="hasImageFilter">Only entries with images</label>
+          </div>
+
+          <div class="control-group">
+            <label for="sortSelect">Sort by</label>
+            <select id="sortSelect">
+              <option value="anime">Anime title (A–Z)</option>
+              <option value="character">Character name (A–Z)</option>
+              <option value="va">VA name (A–Z)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="control-row buttons-row">
+          <button id="showAllBtn" type="button">Show All (keep filters)</button>
+          <button id="clearAllBtn" type="button" class="secondary">
+            Clear All Filters
+          </button>
+        </div>
+
+        <div class="control-row">
+          <p id="resultsSummary" class="summary-text">
+            Database loading...
+          </p>
+        </div>
+      </section>
+
+      <!-- Results + detail -->
+      <section class="results-layout">
+        <div id="cardsContainer" class="results-list">
+          <!-- Result rows rendered here via JS -->
+        </div>
+
+        <aside id="detailPanel" class="detail-panel">
+          <p class="summary-text">
+            Select an entry to see details and images.
+          </p>
+        </aside>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+      // simple SW registration
+      if (
+        "serviceWorker" in navigator &&
+        window.location.hostname !== "localhost"
+      ) {
+        navigator.serviceWorker.register("service-worker.js").catch(() => {});
+      }
+    </script>
+  </body>
+</html>

@@ -1,5 +1,6 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
   margin: 0;
   padding: 0;
   background: #1e1e1e;
@@ -58,24 +59,71 @@ h1 {
 /* === New layout + controls for the PWA search/filter UI === */
 
 .app-header {
-  padding: 1rem 1.25rem;
+  padding: 1.25rem 1.25rem 0.75rem;
   border-bottom: 1px solid #333;
   background: #292929;
 }
 
 .app-header h1 {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
 }
 
 .subtitle {
   margin: 0.25rem 0 0;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: #b0b0c0;
 }
 
 .app-main {
   padding: 0.75rem 1.25rem 1.25rem;
+}
+
+/* Make the main search chunk feel substantial */
+.search-group {
+  width: 100%;
+}
+.search-wrapper {
+  position: relative;
+}
+#searchInput {
+  width: 100%;
+  font-size: 1rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.8rem;
+  border: 1px solid #33334a;
+  background: #10101a;
+  color: #f2f2f2;
+}
+
+/* Autocomplete dropdown under search */
+.search-suggestions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 0.1rem;
+  z-index: 20;
+  background: #181825;
+  border-radius: 0 0 0.8rem 0.8rem;
+  border: 1px solid #33334a;
+  max-height: 260px;
+  overflow-y: auto;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  display: none;
+}
+
+.suggestion-item {
+  padding: 0.55rem 0.8rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #26263a;
+  cursor: pointer;
+}
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+.suggestion-item:hover {
+  background: #302536;
 }
 
 .controls {
@@ -229,6 +277,7 @@ button:hover {
   border-color: #ffc107;
   color: #ffeab3;
 }
+
 /* === Results list + detail panel (desktop-style behavior) === */
 
 .results-layout {
@@ -325,25 +374,21 @@ button:hover {
   gap: 0.5rem;
 }
 
-/* Each image gets a consistent portrait-ish box */
+/* Uniform image blocks (clean up the debug border) */
 .detail-image-block {
   flex: 1 1 140px;
   max-width: 220px;
-
-  /* new: enforce size + hide overflow */
-  aspect-ratio: 3 / 4;      /* adjust if you like 4/5, 2/3, etc. */
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   border-radius: 0.75rem;
   background: black;
-  border: 8px solid hotpink;  /* debug border - remove or change color */
+  border: 2px solid #ff8dcf;
 }
-
-/* Make the image fill the box */
 .detail-image-block img {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;        /* crop to fit the box nicely */
+  object-fit: cover;
 }
 
 .detail-image-label {
@@ -371,3 +416,24 @@ button:hover {
   font-weight: 600;
 }
 
+.lang-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.lang-btn {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 0.6rem;
+  border: 1px solid #ff8dcf;
+  background: #302536;
+  color: #ffebff;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.lang-btn.selected {
+  background: #ff8dcf;
+  color: black;
+}

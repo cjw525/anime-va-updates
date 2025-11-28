@@ -3,6 +3,7 @@
 let allEntries = [];
 let filteredEntries = [];
 let selectedEntryId = null;
+let suggestionsContainer = null;
 
 // Utility: safely pull fields
 function getField(entry, possibleKeys, fallback = "") {
@@ -70,6 +71,7 @@ function applyFilters() {
   const sortSelect = document.getElementById("sortSelect");
 
   const q = (searchInput.value || "").trim().toLowerCase();
+  updateSuggestions(q);
   const seenVal = seenFilter.value;
   const typeVal = typeFilter.value;
   const onlyWithImage = hasImageFilter.checked;
@@ -155,6 +157,80 @@ function updateSummary() {
   } else {
     summary.textContent = `Showing ${shown} of ${total} entries.`;
   }
+}
+
+function updateSuggestions(q) {
+  if (!suggestionsContainer) return;
+
+  suggestionsContainer.innerHTML = "";
+
+  // Hide suggestions if nothing typed or DB not ready
+  if (!q || q.length < 2 || !allEntries.length) {
+    suggestionsContainer.style.display = "none";
+    return;
+  }
+
+  const needle = q.toLowerCase();
+  const matches = [];
+
+  for (const entry of allEntries) {
+    const anime = getField(entry, ["anime"]);
+    const character = getField(entry, ["character"]);
+    const va = getField(entry, ["voiceActor", "voice_actor", "va"]);
+
+    const candidates = [
+      { label: character, type: "Character", entry },
+      { label: anime, type: "Anime", entry },
+      { label: va, type: "Voice Actor", entry },
+    ];
+
+    for (const cand of candidates) {
+      if (!cand.label) continue;
+      if (cand.label.toLowerCase().includes(needle)) {
+        matches.push(cand);
+      }
+    }
+  }
+
+  // Deduplicate + limit to ~8 entries
+  const seen = new Set();
+  const unique = [];
+  for (const m of matches) {
+    const key = `${m.type}:${m.label}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(m);
+    if (unique.length >= 8) break;
+  }
+
+  if (!unique.length) {
+    suggestionsContainer.style.display = "none";
+    return;
+  }
+
+  for (const m of unique) {
+    const item = document.createElement("div");
+    item.className = "suggestion-item";
+    item.textContent = `${m.label} · ${m.type}`;
+
+    item.addEventListener("click", () => {
+      const input = document.getElementById("searchInput");
+      if (input) {
+        input.value = m.label;
+      }
+      suggestionsContainer.style.display = "none";
+
+      // Run a normal filter on that text
+      applyFilters();
+
+      // If we have the exact entry we clicked, select it so images show
+      selectEntry(m.entry);
+    });
+
+    suggestionsContainer.appendChild(item);
+  }
+
+  suggestionsContainer.style.display = "block";
 }
 
 function renderList() {
@@ -351,7 +427,6 @@ function selectEntry(entry) {
     noImg.textContent = "No images available for this entry.";
     panel.appendChild(noImg);
   }
-  panel.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function hookControls() {
@@ -362,6 +437,8 @@ function hookControls() {
   const sortSelect = document.getElementById("sortSelect");
   const showAllBtn = document.getElementById("showAllBtn");
   const clearAllBtn = document.getElementById("clearAllBtn");
+
+  suggestionsContainer = document.getElementById("searchSuggestions");
 
   if (searchInput) searchInput.addEventListener("input", applyFilters);
   if (seenFilter) seenFilter.addEventListener("change", applyFilters);
@@ -392,14 +469,39 @@ function hookControls() {
   }
 }
 
-async function loadData() {
+async function loadDataFor(language) {
   try {
-    const resp = await fetch("../data/anime_va_mobile.json", { cache: "no-store" });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
+    let urls = [];
 
-    // Your JSON is a top-level array of entries
-    allEntries = Array.isArray(data) ? data : data.entries || data.data || [];
+    if (language === "ENG") {
+      urls = ["../data/anime_va_eng.json"];
+    } else if (language === "JPN") {
+      urls = ["../data/anime_va_jpn.json"];
+    } else {
+      urls = [
+        "../data/anime_va_eng.json",
+        "../data/anime_va_jpn.json"
+      ];
+    }
+
+    let combined = [];
+
+    for (const url of urls) {
+      const resp = await fetch(url, { cache: "no-store" });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      const arr = Array.isArray(data) ? data : data.data || [];
+      combined = combined.concat(arr);
+    }
+
+    // Tag entries with which DB they came from
+    combined.forEach(entry => {
+      if (!entry.language) {
+        entry.language = language === "BOTH" ? "unknown" : language;
+      }
+    });
+
+    allEntries = combined;
     filteredEntries = [];
     selectedEntryId = null;
 
@@ -408,19 +510,39 @@ async function loadData() {
       container.innerHTML =
         "<p class='summary-text'>Database loaded. Type in the search box or use filters to see entries.</p>";
     }
+
     clearDetailPanelIfNeeded();
     updateSummary();
   } catch (err) {
-    console.error("Failed to load anime_va_mobile.json", err);
+    console.error("Failed to load DB", err);
     const container = document.getElementById("cardsContainer");
     if (container) {
       container.innerHTML =
-        "<p class='summary-text'>Error loading data. Check console.</p>";
+        "<p class='summary-text'>Error loading chosen database(s). Check console.</p>";
     }
   }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
   hookControls();
-  loadData();
+
+  const engBtn = document.getElementById("langEng");
+  const jpnBtn = document.getElementById("langJpn");
+  const bothBtn = document.getElementById("langBoth");
+
+  function selectLang(btn, lang) {
+    document
+      .querySelectorAll(".lang-btn")
+      .forEach(b => b.classList.remove("selected"));
+
+    btn.classList.add("selected");
+    loadDataFor(lang);
+  }
+
+  engBtn.addEventListener("click", () => selectLang(engBtn, "ENG"));
+  jpnBtn.addEventListener("click", () => selectLang(jpnBtn, "JPN"));
+  bothBtn.addEventListener("click", () => selectLang(bothBtn, "BOTH"));
+
+  // Default on startup: ENG DB
+  selectLang(engBtn, "ENG");
 });
