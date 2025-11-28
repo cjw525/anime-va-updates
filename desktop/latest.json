@@ -1,8 +1,8 @@
 ﻿{
-    "version":  "0.4.3",
-    "notes":  "Release 0.4.3\r\n- testing testing 1 2 3\r\n- fix the db database image issue",
-    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.3/Anime.VA.Setup.0.4.3.exe",
-    "sha256":  "86B7F08919C1B00B5CB7320DBF852C1FED7819601FDCF51D08765A4F7221C69B",
-    "latest_version":  "0.4.3",
-    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.3/Anime.VA.Setup.0.4.3.exe"
+    "version":  "0.4.4",
+    "notes":  "Release 0.4.4\r\n- testing testing 1 2 3\r\n- fix the db database image issue\r\n- what if i were dead",
+    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.4/Anime.VA.Setup.0.4.4.exe",
+    "sha256":  "907D0AC80F09C5526D2F3D2B1BE27D48EB901850884028268E5520E7DCA82CE3",
+    "latest_version":  "0.4.4",
+    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.4/Anime.VA.Setup.0.4.4.exe"
 }
