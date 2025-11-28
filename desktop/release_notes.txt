@@ -1,4 +1,3 @@
-Release 0.4.1
-- fuzzy search implemented for macrons and shit
-- TBR List on Anime List Tab 
-- Seen filter and TBR filter added to Anime List Tab
+Release 0.4.2
+- testing testing 1 2 3
+- fix the jpn database image issue
