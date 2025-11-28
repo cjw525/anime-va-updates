@@ -1,4 +1,3 @@
-Release 0.4.6
-- kermit snooicide
-- update seen and tbr locally
-- db and app updates won't affect these files
+Release 0.4.7
+- kms a thousand times
+- trying to fix the restart error
