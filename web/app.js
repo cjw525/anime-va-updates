@@ -33,15 +33,33 @@ function normalizeType(valueRaw) {
   return "";
 }
 
-// Returns "eng", "jpn", or null
-function getImageLang(entry) {
-  let langRaw = entry.language || "";
-  langRaw = langRaw.toString().toUpperCase();
+function buildLocalImagePath(raw, entry) {
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
 
-  if (langRaw.includes("ENG")) return "eng";
-  if (langRaw.includes("JPN") || langRaw.includes("JP")) return "jpn";
+  // Already an explicit path (e.g., "images/eng/foo.png", "eng/foo.png", "jpn/bar.jpg")
+  if (
+    trimmed.startsWith("images/") ||
+    trimmed.startsWith("eng/") ||
+    trimmed.startsWith("jpn/")
+  ) {
+    // If it already starts with "images/", just return as-is
+    if (trimmed.startsWith("images/")) {
+      return trimmed;
+    }
+    // Otherwise, hang it off /images
+    return `images/${trimmed}`;
+  }
 
-  return null; // unknown
+  // Bare filename: choose folder based on language
+  const lang = (entry.language || "").toString().toLowerCase();
+
+  if (lang.includes("jpn") || lang === "jp") {
+    return `images/jpn/${trimmed}`;
+  }
+
+  // Default to ENG folder
+  return `images/eng/${trimmed}`;
 }
 
 // Character image URL
@@ -59,9 +77,7 @@ function getCharacterImageUrl(entry) {
     return raw;
   }
 
-  // detect language folder
-  const lang = getImageLang(entry) || "eng"; // default ENG fallback
-  return `images/${lang}/${raw}`;
+  return buildLocalImagePath(raw, entry);
 }
 
 // VA image URL
@@ -79,9 +95,7 @@ function getVaImageUrl(entry) {
     return raw;
   }
 
-  // detect language folder
-  const lang = getImageLang(entry) || "eng"; // default ENG fallback
-  return `images/${lang}/${raw}`;
+  return buildLocalImagePath(raw, entry);
 }
 
 function applyFilters() {
@@ -512,15 +526,26 @@ async function loadDataFor(language) {
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const data = await resp.json();
       const arr = Array.isArray(data) ? data : data.data || [];
+
+      // Figure out the language for THIS file
+      let sourceLang = "";
+      if (url.toLowerCase().includes("_eng")) {
+        sourceLang = "ENG";
+      } else if (url.toLowerCase().includes("_jpn")) {
+        sourceLang = "JPN";
+      } else {
+        sourceLang = language; // fallback
+      }
+
+      // Tag entries from this file
+      arr.forEach(entry => {
+        if (!entry.language) {
+          entry.language = sourceLang;
+        }
+      });
+
       combined = combined.concat(arr);
     }
-
-    // Tag entries with which DB they came from
-    combined.forEach(entry => {
-      if (!entry.language) {
-        entry.language = language === "BOTH" ? "unknown" : language;
-      }
-    });
 
     allEntries = combined;
     filteredEntries = [];
