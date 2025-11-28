@@ -1,8 +1,8 @@
 ﻿{
-    "version":  "0.4.6",
-    "notes":  "Release 0.4.6\r\n- kermit snooicide\r\n- update seen and tbr locally\r\n- db and app updates won\u0027t affect these files",
-    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.6/Anime.VA.Setup.0.4.6.exe",
-    "sha256":  "39871DAB16061B7C85D2575A8BE346476216F2B1E63DC7A6322D678593EE5D81",
-    "latest_version":  "0.4.6",
-    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.6/Anime.VA.Setup.0.4.6.exe"
+    "version":  "0.4.7",
+    "notes":  "Release 0.4.7\r\n- kms a thousand times\r\n- trying to fix the restart error",
+    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.7/Anime.VA.Setup.0.4.7.exe",
+    "sha256":  "73F39B76A0EB626ADFFFC64113AFA68A2F7A657B50AA98E799D0178167F5C652",
+    "latest_version":  "0.4.7",
+    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.7/Anime.VA.Setup.0.4.7.exe"
 }
