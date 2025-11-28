@@ -1,3 +1,4 @@
-Release 0.4.5
-- i'd rather be dead
-- db image shit
+Release 0.4.6
+- kermit snooicide
+- update seen and tbr locally
+- db and app updates won't affect these files
