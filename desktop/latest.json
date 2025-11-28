@@ -1,8 +1,8 @@
 ﻿{
-    "version":  "0.4.5",
-    "notes":  "Release 0.4.5\r\n- i\u0027d rather be dead\r\n- db image shit",
-    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.5/Anime.VA.Setup.0.4.5.exe",
-    "sha256":  "2E3F4A23A720A18B89F62657EC704EA0F2B608F6ACCD4BAF9ACEE96095399536",
-    "latest_version":  "0.4.5",
-    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.5/Anime.VA.Setup.0.4.5.exe"
+    "version":  "0.4.6",
+    "notes":  "Release 0.4.6\r\n- kermit snooicide\r\n- update seen and tbr locally\r\n- db and app updates won\u0027t affect these files",
+    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.6/Anime.VA.Setup.0.4.6.exe",
+    "sha256":  "39871DAB16061B7C85D2575A8BE346476216F2B1E63DC7A6322D678593EE5D81",
+    "latest_version":  "0.4.6",
+    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.6/Anime.VA.Setup.0.4.6.exe"
 }
