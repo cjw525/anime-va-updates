@@ -33,10 +33,23 @@ function normalizeType(valueRaw) {
   return "";
 }
 
+// Returns "eng", "jpn", or null
+function getImageLang(entry) {
+  let langRaw = entry.language || "";
+  langRaw = langRaw.toString().toUpperCase();
+
+  if (langRaw.includes("ENG")) return "eng";
+  if (langRaw.includes("JPN") || langRaw.includes("JP")) return "jpn";
+
+  return null; // unknown
+}
+
 // Character image URL
 function getCharacterImageUrl(entry) {
   const raw = getField(entry, ["characterImage"], "").trim();
   if (!raw) return "";
+
+  // direct URL passthrough
   if (
     raw.startsWith("http://") ||
     raw.startsWith("https://") ||
@@ -45,13 +58,18 @@ function getCharacterImageUrl(entry) {
   ) {
     return raw;
   }
-  return `images/${raw}`;
+
+  // detect language folder
+  const lang = getImageLang(entry) || "eng"; // default ENG fallback
+  return `images/${lang}/${raw}`;
 }
 
 // VA image URL
 function getVaImageUrl(entry) {
   const raw = getField(entry, ["voiceActorImage"], "").trim();
   if (!raw) return "";
+
+  // direct URL passthrough
   if (
     raw.startsWith("http://") ||
     raw.startsWith("https://") ||
@@ -60,7 +78,10 @@ function getVaImageUrl(entry) {
   ) {
     return raw;
   }
-  return `images/${raw}`;
+
+  // detect language folder
+  const lang = getImageLang(entry) || "eng"; // default ENG fallback
+  return `images/${lang}/${raw}`;
 }
 
 function applyFilters() {
