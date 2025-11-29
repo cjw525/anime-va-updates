@@ -4,6 +4,10 @@ let allEntries = [];
 let filteredEntries = [];
 let selectedEntryId = null;
 let suggestionsContainer = null;
+// Paging-ish clamp for giant result sets
+let filteredTotalCount = 0;   // how many entries actually matched filters
+let filteredClamped = false;  // true if we only show the first chunk
+let forceShowAllOnce = false; // used by the "Show All" button to bypass clamping
 
 // Utility: safely pull fields
 function getField(entry, possibleKeys, fallback = "") {
@@ -169,8 +173,42 @@ function applyFilters() {
     return aKey.localeCompare(bKey);
   });
 
-  filteredEntries = results;
-  // Clear selection when filters change
+  // --- Finalize filtered results, with an optional clamp ---
+
+  // How many entries actually matched all filters
+  filteredTotalCount = results.length;
+
+  // "Default" state = no search text, no special filters
+  const isSearchBlank = !q;
+  const isDefaultFilters =
+    seenVal === "all" &&
+    typeVal === "all" &&
+    !onlyWithImage;
+
+  // Adjust this to taste
+  const CLAMP_LIMIT = 250;
+
+  // Only clamp when:
+  // - user hasn't typed a search
+  // - filters are at their default
+  // - we have a LOT of results
+  // - AND the Show All button didn't just explicitly ask for everything
+  const shouldClamp =
+    !forceShowAllOnce &&
+    isSearchBlank &&
+    isDefaultFilters &&
+    results.length > CLAMP_LIMIT;
+
+  if (shouldClamp) {
+    filteredEntries = results.slice(0, CLAMP_LIMIT);
+    filteredClamped = true;
+  } else {
+    filteredEntries = results;
+    filteredClamped = false;
+  }
+
+  // Reset this after we've honored it once
+  forceShowAllOnce = false;
   selectedEntryId = null;
   renderList();
   updateSummary();
@@ -189,7 +227,11 @@ function updateSummary() {
   } else if (!shown) {
     summary.textContent =
       "Database loaded. Type in the search box or use filters to see entries.";
+  } else if (filteredClamped && filteredTotalCount > shown) {
+    // We clamped a giant list
+    summary.textContent = `Showing first ${shown} of ${filteredTotalCount} matching entries. Add a search or filters, or tap "Show All" if you really want everything.`;
   } else {
+    // Normal case
     summary.textContent = `Showing ${shown} of ${total} entries.`;
   }
 }
@@ -543,9 +585,11 @@ function hookControls() {
   if (hasImageFilter) hasImageFilter.addEventListener("change", applyFilters);
   if (sortSelect) sortSelect.addEventListener("change", applyFilters);
 
-  if (showAllBtn) {
+    if (showAllBtn) {
     showAllBtn.addEventListener("click", () => {
+      // Clear the search, but explicitly bypass the clamp *once*
       searchInput.value = "";
+      forceShowAllOnce = true;
       applyFilters();
     });
   }
