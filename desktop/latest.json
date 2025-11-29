@@ -1,8 +1,8 @@
 ﻿{
-    "version":  "0.5.0",
+    "version":  "0.5.0.1",
     "notes":  "Release 0.5.0\r\n- remembers the language of the last database used\r\n- (doesn\u0027t do so for the workbooks, add that if needed)",
-    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.5.0/Anime.VA.Setup.0.5.0.exe",
-    "sha256":  "74955DD289BD3B2B7A78D32E543BF56C0B1A235226B9D7BCCD02A1FAC5F6BBB6",
-    "latest_version":  "0.5.0",
-    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.5.0/Anime.VA.Setup.0.5.0.exe"
+    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.5.0.1/Anime.VA.Setup.0.5.0.1.exe",
+    "sha256":  "A80DB2C5710B056704968A81055FB4C803C0F49812473866AE449F367D07E4B2",
+    "latest_version":  "0.5.0.1",
+    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.5.0.1/Anime.VA.Setup.0.5.0.1.exe"
 }
