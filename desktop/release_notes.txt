@@ -1,4 +1,5 @@
-Release 0.4.8
-- kms 8 thousand times
-- trying to fix the restart error
-- hey? i'd rather be dead, thanks
+Release 0.4.9
+- i'm not kmsing anymore
+- lots of things? i can't remember
+- added a lot of search tab functionality to List tab and a little to compare tab
+- 

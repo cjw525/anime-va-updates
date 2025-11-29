@@ -1,8 +1,8 @@
 ﻿{
-    "version":  "0.4.8",
-    "notes":  "Release 0.4.8\r\n- kms 8 thousand times\r\n- trying to fix the restart error\r\n- hey? i\u0027d rather be dead, thanks",
-    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.8/Anime.VA.Setup.0.4.8.exe",
-    "sha256":  "F57DB415EE2772E560A0F0261773E14D8179397770468B8FD9D63DFBC96731F2",
-    "latest_version":  "0.4.8",
-    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.8/Anime.VA.Setup.0.4.8.exe"
+    "version":  "0.4.9",
+    "notes":  "Release 0.4.9\r\n- i\u0027m not kmsing anymore\r\n- lots of things? i can\u0027t remember\r\n- added a lot of search tab functionality to List tab and a little to compare tab\r\n-",
+    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.9/Anime.VA.Setup.0.4.9.exe",
+    "sha256":  "346178446B68F52533B3D2C6354D0206229575DD66B87D52A106E3029F70846D",
+    "latest_version":  "0.4.9",
+    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.9/Anime.VA.Setup.0.4.9.exe"
 }
