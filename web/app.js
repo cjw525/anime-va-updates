@@ -349,15 +349,50 @@ function selectEntry(entry) {
   const panel = document.getElementById("detailPanel");
   if (!panel) return;
 
+  const layout = document.querySelector(".results-layout");
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+
+  // On mobile, switch to "detail view" (hide list, show panel)
+  if (layout && isMobile) {
+    layout.classList.add("detail-active");
+  }
+
   const anime = getField(entry, ["anime"], "Unknown anime");
   const character = getField(entry, ["character"], "Unknown character");
   const va = getField(entry, ["voiceActor", "voice_actor", "va"], "Unknown VA");
   const seenRaw = entry["seen"];
   const seenNorm = normalizeSeen(seenRaw);
   const year = getField(entry, ["year"], "");
+  const appearsIn = getField(entry, ["appearsIn", "appears_in"], "");
 
   panel.innerHTML = "";
 
+  // --- Back button (visible only on mobile via CSS) ---
+  const backBtn = document.createElement("button");
+  backBtn.type = "button";
+  backBtn.className = "detail-back-button";
+  backBtn.textContent = "← Back to results";
+
+  backBtn.addEventListener("click", () => {
+    const layoutEl = document.querySelector(".results-layout");
+    if (layoutEl) {
+      layoutEl.classList.remove("detail-active");
+    }
+
+    // Clear selection highlight and reset detail panel text
+    selectedEntryId = null;
+    renderList();
+    clearDetailPanelIfNeeded();
+
+    const list = document.getElementById("cardsContainer");
+    if (list) {
+      list.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+
+  panel.appendChild(backBtn);
+
+  // --- Header / labels ---
   const header = document.createElement("div");
   header.className = "detail-header";
 
@@ -409,9 +444,31 @@ function selectEntry(entry) {
   vaLabel.appendChild(vaValue);
   header.appendChild(vaLabel);
 
+  // Seen / year row (if you already had this, keep it; otherwise you can lift your old code here)
+  const meta = document.createElement("p");
+  meta.className = "detail-meta";
+
+  const parts = [];
+  if (seenNorm === "seen") {
+    parts.push("Seen ✅");
+  } else if (seenNorm === "unseen") {
+    parts.push("Not seen ❌");
+  } else if (seenNorm === "planning") {
+    parts.push("Planning / On-Hold 📝");
+  }
+  if (year) {
+    parts.push(`Year: ${year}`);
+  }
+  if (appearsIn) {
+    parts.push(`Appears in: ${appearsIn}`);
+  }
+
+  meta.textContent = parts.join(" • ");
+  header.appendChild(meta);
+
   panel.appendChild(header);
 
-  // IMAGES – ONLY LOADED FOR THE SELECTED ENTRY
+  // --- IMAGES – ONLY LOADED FOR THE SELECTED ENTRY ---
   const imagesWrapper = document.createElement("div");
   imagesWrapper.className = "detail-images";
 
@@ -461,6 +518,11 @@ function selectEntry(entry) {
     noImg.className = "summary-text";
     noImg.textContent = "No images available for this entry.";
     panel.appendChild(noImg);
+  }
+
+  // Make sure the detail panel is visible on mobile
+  if (isMobile) {
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
 

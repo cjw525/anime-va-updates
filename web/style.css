@@ -293,6 +293,48 @@ button:hover {
   }
 }
 
+/* NEW: mobile "detail view" behavior */
+@media (max-width: 767px) {
+  /* Default mobile: show list, hide detail panel */
+  .results-layout .detail-panel {
+    display: none;
+  }
+
+  /* When we enter "detail-active" mode, show detail and hide list */
+  .results-layout.detail-active .detail-panel {
+    display: block;
+  }
+
+  .results-layout.detail-active .results-list {
+    display: none;
+  }
+}
+
+/* Back button in detail panel (hidden on desktop) */
+.detail-back-button {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .detail-back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid #ff8dcf;
+    background: #241526;
+    color: #ffebff;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+
+  .detail-back-button:hover {
+    background: #302536;
+  }
+}
+
 .results-list {
   flex: 2 1 0;
   display: flex;
