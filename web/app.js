@@ -223,6 +223,7 @@ function applyFilters() {
     selectEntry(filteredEntries[0]);
   }
 }
+
 function updateSummary() {
   const summary = document.getElementById("resultsSummary");
   if (!summary) return;
