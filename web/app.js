@@ -213,8 +213,16 @@ function applyFilters() {
   renderList();
   updateSummary();
   clearDetailPanelIfNeeded();
-}
+  // 🔥 NEW: auto-open only when there is EXACTLY ONE result,
+  // and the user actually searched or changed filters
+  const shouldAutoOpenSingle =
+    filteredEntries.length === 1 &&
+    (!isSearchBlank || !isDefaultFilters);
 
+  if (shouldAutoOpenSingle) {
+    selectEntry(filteredEntries[0]);
+  }
+}
 function updateSummary() {
   const summary = document.getElementById("resultsSummary");
   if (!summary) return;
@@ -299,9 +307,6 @@ function updateSuggestions(q) {
 
       // Run a normal filter on that text
       applyFilters();
-
-      // If we have the exact entry we clicked, select it so images show
-      selectEntry(m.entry);
     });
 
     suggestionsContainer.appendChild(item);
