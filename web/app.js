@@ -4,11 +4,18 @@ let allEntries = [];
 let filteredEntries = [];
 let selectedEntryId = null;
 let suggestionsContainer = null;
+
 // Paging-ish clamp for giant result sets
 let filteredTotalCount = 0;   // how many entries actually matched filters
-let filteredClamped = false;  // true if we only show the first chunk
-let forceShowAllOnce = false; // used by the "Show All" button to bypass clamping
+let filteredClamped = false;  // true if we're in the "default clamp" state
 let suppressSuggestionsOnce = false;
+
+// pagination config
+const DEFAULT_PAGE_SIZE = 50;   // normal “page” size
+const MAX_ROWS_PER_PAGE = 100;  // HARD cap: never render more than this many rows at once
+
+let pageSize = DEFAULT_PAGE_SIZE;
+let currentPage = 1;
 
 // --- Sync backend config ----------------------------------------------------
 
@@ -339,8 +346,7 @@ function applyFilters() {
     return aKey.localeCompare(bKey);
   });
 
-  // --- Finalize filtered results, with an optional clamp ---
-
+  // --- Finalize filtered results + pagination setup ---
   // How many entries actually matched all filters
   filteredTotalCount = results.length;
 
@@ -354,28 +360,25 @@ function applyFilters() {
   // Adjust this to taste
   const CLAMP_LIMIT = 250;
 
-  // Only clamp when:
-  // - user hasn't typed a search
-  // - filters are at their default
-  // - we have a LOT of results
-  // - AND the Show All button didn't just explicitly ask for everything
-  const shouldClamp =
-    !forceShowAllOnce &&
-    isSearchBlank &&
-    isDefaultFilters &&
-    results.length > CLAMP_LIMIT;
-
-  if (shouldClamp) {
-    filteredEntries = results.slice(0, CLAMP_LIMIT);
+  // Decide how big each page should be
+  if (isSearchBlank && isDefaultFilters && results.length > CLAMP_LIMIT) {
+    // Default landing view of a huge DB: clamp to CLAMP_LIMIT rows per page
+    pageSize = Math.min(CLAMP_LIMIT, MAX_ROWS_PER_PAGE);
     filteredClamped = true;
   } else {
-    filteredEntries = results;
+    // Searching / filtering / or manageable result set:
+    // use a saner base page size, still respecting the hard cap
+    pageSize = Math.min(DEFAULT_PAGE_SIZE, MAX_ROWS_PER_PAGE);
     filteredClamped = false;
   }
 
-  // Reset this after we've honored it once
-  forceShowAllOnce = false;
+  // Store ALL matches; renderList will choose which slice to display
+  filteredEntries = results;
+
+  // New filter/search = go back to first page and clear selection
+  currentPage = 1;
   selectedEntryId = null;
+
   renderList();
   updateSummary();
   clearDetailPanelIfNeeded();
@@ -395,19 +398,21 @@ function updateSummary() {
   if (!summary) return;
 
   const total = allEntries.length;
-  const shown = filteredEntries.length;
+  const totalMatches = filteredTotalCount || filteredEntries.length || 0;
+
+  // How many rows are actually visible on this page
+  const effectivePageSize = Math.min(pageSize, MAX_ROWS_PER_PAGE);
+  const shownNow = Math.min(totalMatches, effectivePageSize || totalMatches);
 
   if (!total) {
     summary.textContent = "Loading database...";
-  } else if (!shown) {
+  } else if (!totalMatches) {
     summary.textContent =
       "Database loaded. Type in the search box or use filters to see entries.";
-  } else if (filteredClamped && filteredTotalCount > shown) {
-    // We clamped a giant list
-    summary.textContent = `Showing first ${shown} of ${filteredTotalCount} matching entries. Add a search or filters, or tap "Show All" if you really want everything.`;
+  } else if (filteredClamped && totalMatches > shownNow) {
+    summary.textContent = `Showing first ${shownNow} of ${totalMatches} matching entries. Add a search or filters, or tap "Show All" if you really want more per page.`;
   } else {
-    // Normal case
-    summary.textContent = `Showing ${shown} of ${total} entries.`;
+    summary.textContent = `Showing ${shownNow} of ${total} entries.`;
   }
 }
 
@@ -512,7 +517,9 @@ function renderList() {
 
   container.innerHTML = "";
 
-  if (!filteredEntries.length) {
+  const totalMatches = filteredEntries.length;
+
+  if (!totalMatches) {
     const msg = document.createElement("p");
     msg.className = "summary-text";
     msg.textContent =
@@ -521,7 +528,23 @@ function renderList() {
     return;
   }
 
-  for (const entry of filteredEntries) {
+  // Never render more than MAX_ROWS_PER_PAGE at once
+  const effectivePageSize = Math.min(pageSize, MAX_ROWS_PER_PAGE);
+
+  // For now we only really use page 1, but wire it correctly
+  const totalPages =
+    effectivePageSize > 0
+      ? Math.max(1, Math.ceil(totalMatches / effectivePageSize))
+      : 1;
+
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  const startIndex = (currentPage - 1) * effectivePageSize;
+  const endIndex = Math.min(startIndex + effectivePageSize, totalMatches);
+  const pageEntries = filteredEntries.slice(startIndex, endIndex);
+
+  for (const entry of pageEntries) {
     const anime = getField(entry, ["anime"], "Unknown anime");
     const character = getField(entry, ["character"], "Unknown character");
     const va = getField(entry, ["voiceActor", "voice_actor", "va"], "Unknown VA");
@@ -535,7 +558,6 @@ function renderList() {
       row.classList.add("selected");
     }
 
-    // main line: Character — Anime
     const main = document.createElement("div");
     main.className = "result-main";
 
@@ -551,23 +573,22 @@ function renderList() {
     main.appendChild(document.createElement("br"));
     main.appendChild(animeSpan);
 
-    // meta: VA + Seen
     const meta = document.createElement("div");
     meta.className = "result-meta";
     meta.textContent = `VA: ${va}`;
 
-    const tags = document.createElement("div");
-    tags.className = "result-tags";
-
     row.appendChild(main);
     row.appendChild(meta);
-    
+
     row.addEventListener("click", () => {
       selectEntry(entry);
     });
 
     container.appendChild(row);
   }
+
+  // If we later add prev/next buttons, we’d update them here
+  // updatePaginationControls(totalPages, currentPage, effectivePageSize, totalMatches);
 }
 
 function clearDetailPanelIfNeeded() {
@@ -776,6 +797,7 @@ function hookControls() {
 
   suggestionsContainer = document.getElementById("searchSuggestions");
 
+  // Click outside suggestions = hide dropdown
   document.addEventListener("click", (event) => {
     if (!suggestionsContainer || !searchInput) return;
 
@@ -790,35 +812,53 @@ function hookControls() {
     suggestionsContainer.style.display = "none";
   });
 
+  // Live filters
   if (searchInput) searchInput.addEventListener("input", applyFilters);
   if (seenFilter) seenFilter.addEventListener("change", applyFilters);
   if (typeFilter) typeFilter.addEventListener("change", applyFilters);
   if (hasImageFilter) hasImageFilter.addEventListener("change", applyFilters);
   if (sortSelect) sortSelect.addEventListener("change", applyFilters);
 
-    if (showAllBtn) {
+  // "Show All" = bump pageSize up to the hard max, but DO NOT render 6000 rows
+  if (showAllBtn) {
     showAllBtn.addEventListener("click", () => {
-      // Clear the search, but explicitly bypass the clamp *once*
-      searchInput.value = "";
-      forceShowAllOnce = true;
-      applyFilters();
-    });
-  }
-
-  if (clearAllBtn) {
-    clearAllBtn.addEventListener("click", () => {
-      searchInput.value = "";
-      seenFilter.value = "all";
-      typeFilter.value = "all";
-      hasImageFilter.checked = false;
-      sortSelect.value = "anime";
-      filteredEntries = [];
-      selectedEntryId = null;
-      // 🔹 NEW: make sure we’re in list view again on mobile
+      // Make sure we’re in list view on mobile
       const layoutEl = document.querySelector(".results-layout");
       if (layoutEl) {
         layoutEl.classList.remove("detail-active");
       }
+
+      // Keep current search/filters, just show the biggest safe page
+      pageSize = MAX_ROWS_PER_PAGE;
+      filteredClamped = false;
+      currentPage = 1;
+
+      renderList();
+      updateSummary();
+    });
+  }
+
+  // Clear all filters and reset paging
+  if (clearAllBtn) {
+    clearAllBtn.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "";
+      if (seenFilter) seenFilter.value = "all";
+      if (typeFilter) typeFilter.value = "all";
+      if (hasImageFilter) hasImageFilter.checked = false;
+      if (sortSelect) sortSelect.value = "anime";
+
+      filteredEntries = [];
+      filteredTotalCount = 0;
+      selectedEntryId = null;
+      pageSize = DEFAULT_PAGE_SIZE;
+      currentPage = 1;
+
+      // Make sure we’re in list view again on mobile
+      const layoutEl = document.querySelector(".results-layout");
+      if (layoutEl) {
+        layoutEl.classList.remove("detail-active");
+      }
+
       renderList();
       updateSummary();
       clearDetailPanelIfNeeded();
