@@ -268,7 +268,7 @@ function applyFilters() {
   filteredTotalCount = results.length;
 
   // "Default" state = no search text, no special filters
-  const isSearchBlank = !q;
+  const isSearchBlank = !qNorm;
   const isDefaultFilters =
     seenVal === "all" &&
     typeVal === "all" &&
