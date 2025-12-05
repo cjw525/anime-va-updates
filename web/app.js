@@ -26,6 +26,70 @@ let activeProfileState = {};
 // If you don't set it, leave this as "".
 const SYNC_API_KEY = "";
 
+// --- Cache / SW helpers -----------------------------------------------------
+
+async function clearPwaCacheAndSw() {
+  const result = {
+    removedCaches: [],
+    unregistered: false,
+  };
+
+  // Clear our caches
+  if ("caches" in window) {
+    const keys = await caches.keys();
+    // Only nuke caches that belong to this app
+    const ourKeys = keys.filter((k) => k.startsWith("anime-va-cache"));
+    await Promise.all(
+      ourKeys.map(async (k) => {
+        const ok = await caches.delete(k);
+        if (ok) result.removedCaches.push(k);
+      })
+    );
+  }
+
+  // Unregister service workers for this origin
+  if ("serviceWorker" in navigator) {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    if (regs.length > 0) {
+      result.unregistered = true;
+      await Promise.all(regs.map((r) => r.unregister()));
+    }
+  }
+
+  return result;
+}
+
+function handleClearCacheClick() {
+  const statusEl = document.getElementById("clearCacheStatus");
+  if (statusEl) {
+    statusEl.textContent = "Clearing app cache…";
+  }
+
+  clearPwaCacheAndSw()
+    .then((info) => {
+      console.log("Cache clear result:", info);
+      if (statusEl) {
+        if (info.removedCaches.length || info.unregistered) {
+          statusEl.textContent = "Cache cleared. Reloading…";
+        } else {
+          statusEl.textContent =
+            "No app cache found, reloading with fresh assets…";
+        }
+      }
+      // Give the text a moment to show, then hard reload
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    })
+    .catch((err) => {
+      console.error("Error clearing cache", err);
+      if (statusEl) {
+        statusEl.textContent =
+          "Error clearing cache. Check console for details.";
+      }
+    });
+}
+
 // Utility: safely pull fields
 function getField(entry, possibleKeys, fallback = "") {
   for (const key of possibleKeys) {
@@ -696,6 +760,7 @@ function hookControls() {
   const sortSelect = document.getElementById("sortSelect");
   const showAllBtn = document.getElementById("showAllBtn");
   const clearAllBtn = document.getElementById("clearAllBtn");
+  const clearCacheBtn = document.getElementById("clearCacheBtn");
 
   suggestionsContainer = document.getElementById("searchSuggestions");
 
@@ -741,6 +806,10 @@ function hookControls() {
       updateSummary();
       clearDetailPanelIfNeeded();
     });
+  }
+
+  if (clearCacheBtn) {
+    clearCacheBtn.addEventListener("click", handleClearCacheClick);
   }
 }
 

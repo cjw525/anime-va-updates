@@ -205,6 +205,18 @@ button:hover {
   filter: brightness(1.1);
 }
 
+/* Danger button (for destructive actions like clearing cache) */
+button.danger {
+  border-color: #ff4f4f;
+  background: #402020;
+  color: #ffd6d6;
+}
+
+button.danger:hover {
+  background: #522626;
+  filter: brightness(1.1);
+}
+
 .summary-text {
   font-size: 0.8rem;
   color: #b0b0c0;
