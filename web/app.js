@@ -347,13 +347,15 @@ function updateSuggestions(q) {
     return;
   }
 
+  const norm = normalizeSearchText(q);
+  const qTokens = norm ? norm.split(" ") : [];
+
   // Hide suggestions if nothing typed or DB not ready
-  if (!q || q.length < 2 || !allEntries.length) {
+  if (!qTokens.length || !allEntries.length) {
     suggestionsContainer.style.display = "none";
     return;
   }
 
-  const needle = q.toLowerCase();
   const matches = [];
 
   for (const entry of allEntries) {
@@ -369,13 +371,26 @@ function updateSuggestions(q) {
 
     for (const cand of candidates) {
       if (!cand.label) continue;
-      if (cand.label.toLowerCase().includes(needle)) {
-        matches.push(cand);
+
+      const labelNorm = normalizeSearchText(cand.label);
+      if (!labelNorm) continue;
+
+      if (qTokens.length === 1) {
+        // single-word: substring for nice partial matching
+        if (labelNorm.includes(qTokens[0])) {
+          matches.push(cand);
+        }
+      } else {
+        // multi-word: bag-of-words against this label
+        const labelTokens = new Set(labelNorm.split(" "));
+        if (qTokens.every((t) => labelTokens.has(t))) {
+          matches.push(cand);
+        }
       }
     }
   }
 
-  // Deduplicate + limit to ~8 entries
+  // Deduplicate + limit to ~8 entries (same as you already had)
   const seen = new Set();
   const unique = [];
   for (const m of matches) {
