@@ -254,6 +254,13 @@ function applyFilters() {
   const hasImageFilter = document.getElementById("hasImageFilter");
   const sortSelect = document.getElementById("sortSelect");
 
+  // 🔹 NEW: when filters/search change, default back to list view on mobile
+  const layout = document.querySelector(".results-layout");
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+  if (layout && isMobile) {
+    layout.classList.remove("detail-active");
+  }
+
   const rawQuery = (searchInput.value || "").trim();
   updateSuggestions(rawQuery);
 
@@ -807,6 +814,11 @@ function hookControls() {
       sortSelect.value = "anime";
       filteredEntries = [];
       selectedEntryId = null;
+      // 🔹 NEW: make sure we’re in list view again on mobile
+      const layoutEl = document.querySelector(".results-layout");
+      if (layoutEl) {
+        layoutEl.classList.remove("detail-active");
+      }
       renderList();
       updateSummary();
       clearDetailPanelIfNeeded();
@@ -865,6 +877,11 @@ async function loadDataFor(language) {
     filteredEntries = [];
     selectedEntryId = null;
 
+    // 🔹 Optional: switching DBs also returns to list view
+    const layoutEl = document.querySelector(".results-layout");
+    if (layoutEl) {
+      layoutEl.classList.remove("detail-active");
+    }
     // Fetch remote profile state for seen status (read-only sync v0.1)
     await fetchProfileState(activeProfileId);
 
