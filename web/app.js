@@ -48,6 +48,21 @@ function normalizeSeen(valueRaw) {
   return "";
 }
 
+function normalizeSearchText(s) {
+  if (!s) return "";
+  // Strip accents (NFKD decompose + remove combining marks)
+  let out = s.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+  out = out.toLowerCase();
+
+  // Optional: basic romaji long-vowel collapse
+  out = out.replace(/([ou])u/g, "$1")  // ou -> o, uu -> u
+           .replace(/([ou])\1+/g, "$1"); // oo -> o, ooo -> o
+
+  // Collapse whitespace
+  out = out.trim().split(/\s+/).join(" ");
+  return out;
+}
+
 function makeEntryKey(entry) {
   const lang = (entry.language || "").toString().toUpperCase() || "ENG";
   const id = entry.id != null ? String(entry.id) : "";
@@ -169,8 +184,12 @@ function applyFilters() {
   const hasImageFilter = document.getElementById("hasImageFilter");
   const sortSelect = document.getElementById("sortSelect");
 
-  const q = (searchInput.value || "").trim().toLowerCase();
-  updateSuggestions(q);
+  const rawQuery = (searchInput.value || "").trim();
+  updateSuggestions(rawQuery);
+
+  const qNorm = normalizeSearchText(rawQuery);
+  const qTokens = qNorm ? qNorm.split(" ") : [];
+
   const seenVal = seenFilter.value;
   const typeVal = typeFilter.value;
   const onlyWithImage = hasImageFilter.checked;
@@ -179,13 +198,23 @@ function applyFilters() {
   let results = [...allEntries];
 
   // Search across anime, character, VA
-  if (q) {
+  if (qTokens.length > 0) {
     results = results.filter((entry) => {
       const anime = getField(entry, ["anime"]);
       const character = getField(entry, ["character"]);
       const va = getField(entry, ["voiceActor", "voice_actor", "va"]);
-      const haystack = `${anime} ${character} ${va}`.toLowerCase();
-      return haystack.includes(q);
+      const haystackNorm = normalizeSearchText(`${anime} ${character} ${va}`);
+
+      const hayTokens = new Set(haystackNorm.split(" "));
+
+      if (qTokens.length === 1) {
+        // Keep substring behavior for single-word fuzzy matches
+        const q = qTokens[0];
+        return haystackNorm.includes(q);
+      }
+
+      // Multi-word: require all query tokens to appear (order-agnostic)
+      return qTokens.every((t) => hayTokens.has(t));
     });
   }
 
