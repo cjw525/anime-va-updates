@@ -9,6 +9,22 @@ let filteredTotalCount = 0;   // how many entries actually matched filters
 let filteredClamped = false;  // true if we only show the first chunk
 let forceShowAllOnce = false; // used by the "Show All" button to bypass clamping
 
+// --- Sync backend config ----------------------------------------------------
+
+// Set this to wherever FastAPI is deployed.
+// For local dev use: "http://localhost:8000"
+const SYNC_API_BASE = "https://YOUR-DEPLOY-URL-HERE"; 
+
+// Later we'll let users pick this; for now, just "jades"
+let activeProfileId = "jades";
+
+// Remote per-entry state keyed by "LANG-id"
+let activeProfileState = {};
+
+// Optional: if you set AV_SYNC_API_KEY on the server, put that value here.
+// If you don't set it, leave this as "".
+const SYNC_API_KEY = "";
+
 // Utility: safely pull fields
 function getField(entry, possibleKeys, fallback = "") {
   for (const key of possibleKeys) {
@@ -30,6 +46,50 @@ function normalizeSeen(valueRaw) {
   if (v.startsWith("unseen") || v === "n" || v === "no") return "unseen";
   if (v.includes("plan") || v.includes("hold")) return "planning";
   return "";
+}
+
+function makeEntryKey(entry) {
+  const lang = (entry.language || "").toString().toUpperCase() || "ENG";
+  const id = entry.id != null ? String(entry.id) : "";
+  return `${lang}-${id}`;
+}
+
+// Get the "effective" seen value for an entry, preferring remote state if present.
+function getSeenValue(entry) {
+  const key = makeEntryKey(entry);
+  const remote = activeProfileState[key];
+
+  if (remote && typeof remote.seen === "boolean") {
+    // normalizeSeen already handles boolean true/false
+    return remote.seen;
+  }
+
+  // Fallback to whatever is in the JSON
+  return entry["seen"];
+}
+
+async function fetchProfileState(profileId) {
+  try {
+    const url = `${SYNC_API_BASE}/profiles/${encodeURIComponent(profileId)}/state`;
+    const headers = {};
+    if (SYNC_API_KEY) {
+      headers["X-API-Key"] = SYNC_API_KEY;
+    }
+
+    const resp = await fetch(url, { headers });
+    if (!resp.ok) {
+      console.error("Failed to load profile state", resp.status);
+      activeProfileState = {};
+      return;
+    }
+
+    const data = await resp.json();
+    activeProfileState = data.entries || {};
+    console.log("Loaded profile state for", profileId, activeProfileState);
+  } catch (err) {
+    console.error("Error fetching profile state", err);
+    activeProfileState = {};
+  }
 }
 
 // No media type in mobile JSON yet; leave this as a stub.
@@ -132,7 +192,7 @@ function applyFilters() {
   // Seen filter
   if (seenVal !== "all") {
     results = results.filter((entry) => {
-      const raw = entry["seen"];
+      const raw = getSeenValue(entry);
       return normalizeSeen(raw) === seenVal;
     });
   }
@@ -335,7 +395,7 @@ function renderList() {
     const anime = getField(entry, ["anime"], "Unknown anime");
     const character = getField(entry, ["character"], "Unknown character");
     const va = getField(entry, ["voiceActor", "voice_actor", "va"], "Unknown VA");
-    const seenRaw = entry["seen"];
+    const seenRaw = getSeenValue(entry);
     const seenNorm = normalizeSeen(seenRaw);
     const year = getField(entry, ["year"], "");
 
@@ -408,7 +468,7 @@ function selectEntry(entry) {
   const anime = getField(entry, ["anime"], "Unknown anime");
   const character = getField(entry, ["character"], "Unknown character");
   const va = getField(entry, ["voiceActor", "voice_actor", "va"], "Unknown VA");
-  const seenRaw = entry["seen"];
+  const seenRaw = getSeenValue(entry);
   const seenNorm = normalizeSeen(seenRaw);
   const year = getField(entry, ["year"], "");
   const appearsIn = getField(entry, ["appearsIn", "appears_in"], "");
@@ -662,6 +722,9 @@ async function loadDataFor(language) {
     allEntries = combined;
     filteredEntries = [];
     selectedEntryId = null;
+
+    // Fetch remote profile state for seen status (read-only sync v0.1)
+    await fetchProfileState(activeProfileId);
 
     const container = document.getElementById("cardsContainer");
     if (container) {
