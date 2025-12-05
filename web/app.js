@@ -8,6 +8,7 @@ let suggestionsContainer = null;
 let filteredTotalCount = 0;   // how many entries actually matched filters
 let filteredClamped = false;  // true if we only show the first chunk
 let forceShowAllOnce = false; // used by the "Show All" button to bypass clamping
+let suppressSuggestionsOnce = false;
 
 // --- Sync backend config ----------------------------------------------------
 
@@ -339,6 +340,13 @@ function updateSuggestions(q) {
 
   suggestionsContainer.innerHTML = "";
 
+  if (suppressSuggestionsOnce) {
+    suggestionsContainer.style.display = "none";
+    suggestionsContainer.innerHTML = "";
+    suppressSuggestionsOnce = false;
+    return;
+  }
+
   // Hide suggestions if nothing typed or DB not ready
   if (!q || q.length < 2 || !allEntries.length) {
     suggestionsContainer.style.display = "none";
@@ -393,6 +401,8 @@ function updateSuggestions(q) {
       if (input) {
         input.value = m.label;
       }
+
+      suppressSuggestionsOnce = true;
       suggestionsContainer.style.display = "none";
 
       // Run a normal filter on that text
@@ -673,6 +683,20 @@ function hookControls() {
   const clearAllBtn = document.getElementById("clearAllBtn");
 
   suggestionsContainer = document.getElementById("searchSuggestions");
+
+  document.addEventListener("click", (event) => {
+    if (!suggestionsContainer || !searchInput) return;
+
+    const target = event.target;
+
+    // If click is on the input or inside the suggestions, ignore it
+    if (target === searchInput || suggestionsContainer.contains(target)) {
+      return;
+    }
+
+    // Otherwise, hide the dropdown
+    suggestionsContainer.style.display = "none";
+  });
 
   if (searchInput) searchInput.addEventListener("input", applyFilters);
   if (seenFilter) seenFilter.addEventListener("change", applyFilters);
