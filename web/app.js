@@ -31,8 +31,6 @@ let activeProfileId = "jades";
 // Remote per-entry state keyed by "LANG-id"
 let activeProfileState = {};
 
-// Optional: if you set AV_SYNC_API_KEY on the server, put that value here.
-// If you don't set it, leave this as "".
 const SYNC_API_KEY = "";
 
 // --- Cache / SW helpers -----------------------------------------------------
@@ -99,7 +97,6 @@ function handleClearCacheClick() {
     });
 }
 
-// Utility: safely pull fields
 function getField(entry, possibleKeys, fallback = "") {
   for (const key of possibleKeys) {
     if (entry[key] !== undefined && entry[key] !== null) {
@@ -109,7 +106,6 @@ function getField(entry, possibleKeys, fallback = "") {
   return fallback;
 }
 
-// Our JSON uses a boolean "seen" field.
 function normalizeSeen(valueRaw) {
   if (valueRaw === true || valueRaw === "true") return "seen";
   if (valueRaw === false || valueRaw === "false") return "unseen";
@@ -143,7 +139,6 @@ function makeEntryKey(entry) {
   return `${lang}-${id}`;
 }
 
-// Get the "effective" seen value for an entry, preferring remote state if present.
 function getSeenValue(entry) {
   const key = makeEntryKey(entry);
   const remote = activeProfileState[key];
@@ -218,7 +213,6 @@ function buildLocalImagePath(raw, entry) {
   )}`;
 }
 
-// Character image URL
 function getCharacterImageUrl(entry) {
   const raw = getField(entry, ["characterImage"], "").trim();
   if (!raw) return "";
@@ -236,7 +230,6 @@ function getCharacterImageUrl(entry) {
   return buildLocalImagePath(raw, entry);
 }
 
-// VA image URL
 function getVaImageUrl(entry) {
   const raw = getField(entry, ["voiceActorImage"], "").trim();
   if (!raw) return "";
