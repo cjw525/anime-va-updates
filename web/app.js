@@ -15,6 +15,7 @@ let suppressSuggestionsOnce = false;
 // Set this to wherever FastAPI is deployed.
 // For local dev use: "http://localhost:8000"
 const SYNC_API_BASE = "https://anime-va-profile-server.onrender.com";
+const IMAGE_BASE_URL = "https://raw.githubusercontent.com/cjw525/anime-va-images/main";
 
 // Later we'll let users pick this; for now, just "jades"
 let activeProfileId = "jades";
@@ -178,32 +179,33 @@ function normalizeType(valueRaw) {
 }
 
 function buildLocalImagePath(raw, entry) {
-  const trimmed = raw.trim();
+  const trimmed = (raw || "").trim();
   if (!trimmed) return "";
 
-  // Already an explicit path (e.g., "images/eng/foo.png", "eng/foo.png", "jpn/bar.jpg")
+  // Already a full/relative URL? Pass through unchanged.
   if (
-    trimmed.startsWith("images/") ||
-    trimmed.startsWith("eng/") ||
-    trimmed.startsWith("jpn/")
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("./") ||
+    trimmed.startsWith("../")
   ) {
-    // If it already starts with "images/", just return as-is
-    if (trimmed.startsWith("images/")) {
-      return trimmed;
-    }
-    // Otherwise, hang it off /images
-    return `images/${trimmed}`;
+    return trimmed;
   }
 
-  // Bare filename: choose folder based on language
+  // Normalize: strip old local prefixes like images/eng/ or eng/
+  let filename = trimmed
+    .replace(/^images\//i, "")
+    .replace(/^eng\//i, "")
+    .replace(/^jpn\//i, "");
+
   const lang = (entry.language || "").toString().toLowerCase();
-
+  let folder = "eng";
   if (lang.includes("jpn") || lang === "jp") {
-    return `images/jpn/${trimmed}`;
+    folder = "jpn";
   }
 
-  // Default to ENG folder
-  return `images/eng/${trimmed}`;
+  // Final URL into the new images repo
+  return `${IMAGE_BASE_URL}/${folder}/${filename}`;
 }
 
 // Character image URL
