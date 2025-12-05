@@ -518,6 +518,7 @@ function renderList() {
     msg.textContent =
       "No entries match your filters yet. Try searching or adjusting filters.";
     container.appendChild(msg);
+    updatePaginationControls(0, 1, 0, 0);
     return;
   }
 
@@ -581,7 +582,29 @@ function renderList() {
   }
 
   // If we later add prev/next buttons, we’d update them here
-  // updatePaginationControls(totalPages, currentPage, effectivePageSize, totalMatches);
+  updatePaginationControls(totalPages, currentPage, effectivePageSize, totalMatches);
+}
+
+function updatePaginationControls(totalPages, currentPage, effectivePageSize, totalMatches) {
+  const controls = document.getElementById("paginationControls");
+  const prevBtn = document.getElementById("prevPageBtn");
+  const nextBtn = document.getElementById("nextPageBtn");
+  const pageInfo = document.getElementById("pageInfo");
+
+  if (!controls || !prevBtn || !nextBtn || !pageInfo) return;
+
+  // If there are no matches or only one page, hide controls
+  if (!totalMatches || totalPages <= 1) {
+    controls.style.display = "none";
+    return;
+  }
+
+  controls.style.display = "flex";   // or "block", depending on your CSS
+
+  pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+
+  prevBtn.disabled = currentPage <= 1;
+  nextBtn.disabled = currentPage >= totalPages;
 }
 
 function clearDetailPanelIfNeeded() {
@@ -787,6 +810,8 @@ function hookControls() {
   const showAllBtn = document.getElementById("showAllBtn");
   const clearAllBtn = document.getElementById("clearAllBtn");
   const clearCacheBtn = document.getElementById("clearCacheBtn");
+  const prevPageBtn = document.getElementById("prevPageBtn");
+  const nextPageBtn = document.getElementById("nextPageBtn");
 
   suggestionsContainer = document.getElementById("searchSuggestions");
 
@@ -860,6 +885,24 @@ function hookControls() {
 
   if (clearCacheBtn) {
     clearCacheBtn.addEventListener("click", handleClearCacheClick);
+  }
+
+  if (prevPageBtn) {
+    prevPageBtn.addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderList();
+        updateSummary();
+      }
+    });
+  }
+
+  if (nextPageBtn) {
+    nextPageBtn.addEventListener("click", () => {
+      currentPage += 1;
+      renderList();
+      updateSummary();
+    });
   }
 }
 
