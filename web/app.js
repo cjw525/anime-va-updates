@@ -13,7 +13,7 @@ let forceShowAllOnce = false; // used by the "Show All" button to bypass clampin
 
 // Set this to wherever FastAPI is deployed.
 // For local dev use: "http://localhost:8000"
-const SYNC_API_BASE = "https://YOUR-DEPLOY-URL-HERE"; 
+const SYNC_API_BASE = "https://anime-va-profile-server.onrender.com";
 
 // Later we'll let users pick this; for now, just "jades"
 let activeProfileId = "jades";
