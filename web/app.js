@@ -390,22 +390,55 @@ function updateSummary() {
   const summary = document.getElementById("resultsSummary");
   if (!summary) return;
 
-  const total = allEntries.length;
-  const totalMatches = filteredTotalCount || filteredEntries.length || 0;
+  const totalInDb = allEntries.length;
 
-  // How many rows are actually visible on this page
-  const effectivePageSize = Math.min(pageSize, MAX_ROWS_PER_PAGE);
-  const shownNow = Math.min(totalMatches, effectivePageSize || totalMatches);
+  // How many entries match current search/filters total
+  const totalMatches =
+    (typeof filteredTotalCount === "number" && filteredTotalCount > 0)
+      ? filteredTotalCount
+      : filteredEntries.length;
 
-  if (!total) {
+  // No DB loaded yet
+  if (!totalInDb) {
     summary.textContent = "Loading database...";
-  } else if (!totalMatches) {
+    return;
+  }
+
+  // DB loaded but nothing matches
+  if (!totalMatches) {
     summary.textContent =
       "Database loaded. Type in the search box or use filters to see entries.";
-  } else if (filteredClamped && totalMatches > shownNow) {
-    summary.textContent = `Showing first ${shownNow} of ${totalMatches} matching entries. Add a search or filters, or tap "Show All" if you really want more per page.`;
+    return;
+  }
+
+  // Figure out current page + how many are actually visible on this page
+  const effectivePageSize = Math.min(pageSize || DEFAULT_PAGE_SIZE, MAX_ROWS_PER_PAGE);
+  const totalPages =
+    effectivePageSize > 0
+      ? Math.max(1, Math.ceil(totalMatches / effectivePageSize))
+      : 1;
+
+  const safeCurrentPage = Math.min(
+    Math.max(currentPage || 1, 1),
+    totalPages
+  );
+
+  const startIndex = (safeCurrentPage - 1) * effectivePageSize;
+  const endIndex = Math.min(startIndex + effectivePageSize, totalMatches);
+  const shownNow = Math.max(0, endIndex - startIndex);
+
+  // Clamped “default view” of a giant DB
+  if (filteredClamped && totalMatches > shownNow) {
+    summary.textContent =
+      `Showing first ${shownNow} of ${totalMatches} matching entries ` +
+      `(page ${safeCurrentPage} of ${totalPages}). ` +
+      `Add a search or filters, or use Next / "Show All" to see more.`;
   } else {
-    summary.textContent = `Showing ${shownNow} of ${total} entries.`;
+    // Normal case
+    summary.textContent =
+      `Showing ${shownNow} of ${totalInDb} entries ` +
+      `(page ${safeCurrentPage} of ${totalPages}, ` +
+      `${totalMatches} match your filters).`;
   }
 }
 
