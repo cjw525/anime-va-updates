@@ -442,6 +442,23 @@ function updateSummary() {
   }
 }
 
+function quickSearchFromText(text) {
+  const searchInput = document.getElementById("searchInput");
+  if (!searchInput) return;
+
+  const value = (text || "").toString().trim();
+  if (!value) return;
+
+  // Put it into the search box
+  searchInput.value = value;
+
+  // Optional: don’t pop suggestions for this one programmatic change
+  suppressSuggestionsOnce = true;
+
+  // Run the normal filtering pipeline
+  applyFilters();
+}
+
 function updateSuggestions(q) {
   if (!suggestionsContainer) return;
 
@@ -588,32 +605,63 @@ function renderList() {
     const main = document.createElement("div");
     main.className = "result-main";
 
+    // Character
     const titleSpan = document.createElement("span");
-    titleSpan.className = "result-title";
+    titleSpan.className = "result-title result-clickable"; // <-- Make clickable
     titleSpan.textContent = character;
 
+    // Anime
     const animeSpan = document.createElement("span");
-    animeSpan.className = "result-anime";
+    animeSpan.className = "result-anime result-clickable"; // <-- Make clickable
     animeSpan.textContent = anime;
 
     main.appendChild(titleSpan);
     main.appendChild(document.createElement("br"));
     main.appendChild(animeSpan);
 
+    // VA row
     const meta = document.createElement("div");
     meta.className = "result-meta";
-    meta.textContent = `VA: ${va}`;
+
+    // Label
+    const vaLabel = document.createElement("span");
+    vaLabel.textContent = "VA: ";
+
+    // VA name (clickable)
+    const vaSpan = document.createElement("span");
+    vaSpan.className = "result-va-name result-clickable";
+    vaSpan.textContent = va;
+
+    meta.appendChild(vaLabel);
+    meta.appendChild(vaSpan);
 
     row.appendChild(main);
     row.appendChild(meta);
 
+    // Existing single-click: open detail panel
     row.addEventListener("click", () => {
       selectEntry(entry);
     });
 
+    // NEW: double-click to quick-search
+
+    titleSpan.addEventListener("dblclick", (ev) => {
+      ev.stopPropagation();
+      quickSearchFromText(character);
+    });
+
+    animeSpan.addEventListener("dblclick", (ev) => {
+      ev.stopPropagation();
+      quickSearchFromText(anime);
+    });
+
+    vaSpan.addEventListener("dblclick", (ev) => {
+      ev.stopPropagation();
+      quickSearchFromText(va);
+    });
+
     container.appendChild(row);
   }
-
   // If we later add prev/next buttons, we’d update them here
   updatePaginationControls(totalPages, currentPage, effectivePageSize, totalMatches);
 }

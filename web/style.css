@@ -322,6 +322,14 @@ button.danger:hover {
   }
 }
 
+.result-clickable {
+  cursor: pointer;
+}
+
+.result-clickable:hover {
+  text-decoration: underline;
+}
+
 /* Back button in detail panel (hidden on desktop) */
 .detail-back-button {
   display: none;
