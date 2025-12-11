@@ -12,7 +12,8 @@ let filteredClamped = false;  // true if we're in the "default clamp" state
 let suppressSuggestionsOnce = false;
 
 // pagination config
-const DEFAULT_PAGE_SIZE = 50;   // normal â€œpageâ€ size
+// pagination config
+const DEFAULT_PAGE_SIZE = 50;   // normal "page" size
 const MAX_ROWS_PER_PAGE = 100;  // HARD cap: never render more than this many rows at once
 
 let pageSize = DEFAULT_PAGE_SIZE;
@@ -70,7 +71,7 @@ async function clearPwaCacheAndSw() {
 function handleClearCacheClick() {
   const statusEl = document.getElementById("clearCacheStatus");
   if (statusEl) {
-    statusEl.textContent = "Clearing app cacheâ€¦";
+    statusEl.textContent = "Clearing app cache…";;
   }
 
   clearPwaCacheAndSw()
@@ -78,10 +79,10 @@ function handleClearCacheClick() {
       console.log("Cache clear result:", info);
       if (statusEl) {
         if (info.removedCaches.length || info.unregistered) {
-          statusEl.textContent = "Cache cleared. Reloadingâ€¦";
+          statusEl.textContent = "Cache cleared. Reloading…";
         } else {
           statusEl.textContent =
-            "No app cache found, reloading with fresh assetsâ€¦";
+            "No app cache found, reloading with fresh assets…";
         }
       }
       // Give the text a moment to show, then hard reload
@@ -255,7 +256,7 @@ function applyFilters() {
   const hasImageFilter = document.getElementById("hasImageFilter");
   const sortSelect = document.getElementById("sortSelect");
 
-  // ðŸ”¹ NEW: when filters/search change, default back to list view on mobile
+  // NEW: when filters/search change, default back to list view on mobile
   const layout = document.querySelector(".results-layout");
   const isMobile = window.matchMedia("(max-width: 767px)").matches;
   if (layout && isMobile) {
@@ -376,7 +377,7 @@ function applyFilters() {
   renderList();
   updateSummary();
   clearDetailPanelIfNeeded();
-  // ðŸ”¥ NEW: auto-open only when there is EXACTLY ONE result,
+  // NEW: auto-open only when there is EXACTLY ONE result,
   // and the user actually searched or changed filters
   const shouldAutoOpenSingle =
     filteredEntries.length === 1 &&
@@ -428,7 +429,7 @@ function updateSummary() {
   const endIndex = Math.min(startIndex + effectivePageSize, totalMatches);
   const shownNow = Math.max(0, endIndex - startIndex);
 
-  // Clamped â€œdefault viewâ€ of a giant DB
+  // Clamped "default view" of a giant DB
   if (filteredClamped && totalMatches > shownNow) {
     summary.textContent =
       `Showing first ${shownNow} of ${totalMatches} matching entries ` +
@@ -453,7 +454,7 @@ function quickSearchFromText(text) {
   // Put it into the search box
   searchInput.value = value;
 
-  // Optional: donâ€™t pop suggestions for this one programmatic change
+  // Optional: don't pop suggestions for this one programmatic change
   suppressSuggestionsOnce = true;
 
   // Run the normal filtering pipeline
@@ -663,7 +664,7 @@ function renderList() {
 
     container.appendChild(row);
   }
-  // If we later add prev/next buttons, weâ€™d update them here
+  // If we later add prev/next buttons, we'd update them here
   updatePaginationControls(totalPages, currentPage, effectivePageSize, totalMatches);
 }
 
@@ -922,7 +923,7 @@ function hookControls() {
   // "Show All" = bump pageSize up to the hard max, but DO NOT render 6000 rows
   if (showAllBtn) {
     showAllBtn.addEventListener("click", () => {
-      // Make sure weâ€™re in list view on mobile
+      // Make sure we're in list view on mobile
       const layoutEl = document.querySelector(".results-layout");
       if (layoutEl) {
         layoutEl.classList.remove("detail-active");
@@ -953,7 +954,7 @@ function hookControls() {
       pageSize = DEFAULT_PAGE_SIZE;
       currentPage = 1;
 
-      // Make sure weâ€™re in list view again on mobile
+      // Make sure we're in list view again on mobile
       const layoutEl = document.querySelector(".results-layout");
       if (layoutEl) {
         layoutEl.classList.remove("detail-active");
@@ -1035,7 +1036,7 @@ async function loadDataFor(language) {
     filteredEntries = [];
     selectedEntryId = null;
 
-    // ðŸ”¹ Optional: switching DBs also returns to list view
+    // Optional: switching DBs also returns to list view
     const layoutEl = document.querySelector(".results-layout");
     if (layoutEl) {
       layoutEl.classList.remove("detail-active");
