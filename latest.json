@@ -1,8 +1,0 @@
-﻿{
-    "version":  "0.4.1",
-    "notes":  "Release 0.4.1\r\n- fuzzy search implemented for macrons and shit\r\n- TBR List on Anime List Tab \r\n- Seen filter and TBR filter added to Anime List Tab",
-    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.1/Anime%20VA%20Setup%200.4.1.exe",
-    "sha256":  "951D07F9251E2E2DA3E5282BE109C93D9D182FCEECE0C5C6339464950A9FF404",
-    "latest_version":  "0.4.1",
-    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.4.1/Anime%20VA%20Setup%200.4.1.exe"
-}
