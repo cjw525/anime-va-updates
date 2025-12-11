@@ -71,7 +71,7 @@ async function clearPwaCacheAndSw() {
 function handleClearCacheClick() {
   const statusEl = document.getElementById("clearCacheStatus");
   if (statusEl) {
-    statusEl.textContent = "Clearing app cache…";;
+    statusEl.textContent = "Clearing app cache…";
   }
 
   clearPwaCacheAndSw()
