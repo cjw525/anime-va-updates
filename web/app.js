@@ -23,7 +23,7 @@ let currentPage = 1;
 // For local dev use: "http://localhost:8000"
 const SYNC_API_BASE = "https://anime-va-profile-server.onrender.com";
 const IMAGE_BASE_URL = "https://raw.githubusercontent.com/cjw525/anime-va-images/main";
-const IMAGE_VERSION = "2025-12-10-204458"; // for cache-busting if needed
+const IMAGE_VERSION = "2025-12-10_22-14-58"; // for cache-busting if needed
 
 // Later we'll let users pick this; for now, just "jades"
 let activeProfileId = "jades";
@@ -1083,4 +1083,6 @@ window.addEventListener("DOMContentLoaded", () => {
   // Default on startup: ENG DB
   selectLang(engBtn, "ENG");
 });
+
+
 
