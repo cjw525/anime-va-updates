@@ -1,4 +1,5 @@
-﻿// app.js - table-style list + click-to-view images
+﻿// -*- coding: utf-8 -*-
+// app.js - table-style list + click-to-view images
 
 let allEntries = [];
 let filteredEntries = [];
@@ -533,7 +534,7 @@ function updateSuggestions(q) {
   for (const m of unique) {
     const item = document.createElement("div");
     item.className = "suggestion-item";
-    item.textContent = `${m.label} Â· ${m.type}`;
+    item.textContent = `${m.label} · ${m.type}`;
 
     item.addEventListener("click", () => {
       const input = document.getElementById("searchInput");
@@ -727,7 +728,7 @@ function selectEntry(entry) {
   const backBtn = document.createElement("button");
   backBtn.type = "button";
   backBtn.className = "detail-back-button";
-  backBtn.textContent = "â† Back to results";
+  backBtn.textContent = "← Back to results";
 
   backBtn.addEventListener("click", () => {
     const layoutEl = document.querySelector(".results-layout");
@@ -806,11 +807,11 @@ function selectEntry(entry) {
 
   const parts = [];
   if (seenNorm === "seen") {
-    parts.push("Seen âœ…");
+    parts.push("Seen ✅");
   } else if (seenNorm === "unseen") {
-    parts.push("Not seen âŒ");
+    parts.push("Not seen ❌");
   } else if (seenNorm === "planning") {
-    parts.push("Planning / On-Hold ðŸ“");
+    parts.push("Planning / On-Hold 📚");
   }
   if (year) {
     parts.push(`Year: ${year}`);
@@ -819,7 +820,7 @@ function selectEntry(entry) {
     parts.push(`Appears in: ${appearsIn}`);
   }
 
-  meta.textContent = parts.join(" â€¢ ");
+  meta.textContent = parts.join(" • ");
   header.appendChild(meta);
 
   panel.appendChild(header);
