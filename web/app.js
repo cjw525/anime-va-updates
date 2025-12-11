@@ -1,4 +1,4 @@
-// app.js - table-style list + click-to-view images
+﻿// app.js - table-style list + click-to-view images
 
 let allEntries = [];
 let filteredEntries = [];
@@ -11,7 +11,7 @@ let filteredClamped = false;  // true if we're in the "default clamp" state
 let suppressSuggestionsOnce = false;
 
 // pagination config
-const DEFAULT_PAGE_SIZE = 50;   // normal “page” size
+const DEFAULT_PAGE_SIZE = 50;   // normal â€œpageâ€ size
 const MAX_ROWS_PER_PAGE = 100;  // HARD cap: never render more than this many rows at once
 
 let pageSize = DEFAULT_PAGE_SIZE;
@@ -23,7 +23,7 @@ let currentPage = 1;
 // For local dev use: "http://localhost:8000"
 const SYNC_API_BASE = "https://anime-va-profile-server.onrender.com";
 const IMAGE_BASE_URL = "https://raw.githubusercontent.com/cjw525/anime-va-images/main";
-const IMAGE_VERSION = "2025-12-05"; // for cache-busting if needed
+const IMAGE_VERSION = "2025-12-10-204458"; // for cache-busting if needed
 
 // Later we'll let users pick this; for now, just "jades"
 let activeProfileId = "jades";
@@ -69,7 +69,7 @@ async function clearPwaCacheAndSw() {
 function handleClearCacheClick() {
   const statusEl = document.getElementById("clearCacheStatus");
   if (statusEl) {
-    statusEl.textContent = "Clearing app cache…";
+    statusEl.textContent = "Clearing app cacheâ€¦";
   }
 
   clearPwaCacheAndSw()
@@ -77,10 +77,10 @@ function handleClearCacheClick() {
       console.log("Cache clear result:", info);
       if (statusEl) {
         if (info.removedCaches.length || info.unregistered) {
-          statusEl.textContent = "Cache cleared. Reloading…";
+          statusEl.textContent = "Cache cleared. Reloadingâ€¦";
         } else {
           statusEl.textContent =
-            "No app cache found, reloading with fresh assets…";
+            "No app cache found, reloading with fresh assetsâ€¦";
         }
       }
       // Give the text a moment to show, then hard reload
@@ -254,7 +254,7 @@ function applyFilters() {
   const hasImageFilter = document.getElementById("hasImageFilter");
   const sortSelect = document.getElementById("sortSelect");
 
-  // 🔹 NEW: when filters/search change, default back to list view on mobile
+  // ðŸ”¹ NEW: when filters/search change, default back to list view on mobile
   const layout = document.querySelector(".results-layout");
   const isMobile = window.matchMedia("(max-width: 767px)").matches;
   if (layout && isMobile) {
@@ -375,7 +375,7 @@ function applyFilters() {
   renderList();
   updateSummary();
   clearDetailPanelIfNeeded();
-  // 🔥 NEW: auto-open only when there is EXACTLY ONE result,
+  // ðŸ”¥ NEW: auto-open only when there is EXACTLY ONE result,
   // and the user actually searched or changed filters
   const shouldAutoOpenSingle =
     filteredEntries.length === 1 &&
@@ -427,7 +427,7 @@ function updateSummary() {
   const endIndex = Math.min(startIndex + effectivePageSize, totalMatches);
   const shownNow = Math.max(0, endIndex - startIndex);
 
-  // Clamped “default view” of a giant DB
+  // Clamped â€œdefault viewâ€ of a giant DB
   if (filteredClamped && totalMatches > shownNow) {
     summary.textContent =
       `Showing first ${shownNow} of ${totalMatches} matching entries ` +
@@ -452,7 +452,7 @@ function quickSearchFromText(text) {
   // Put it into the search box
   searchInput.value = value;
 
-  // Optional: don’t pop suggestions for this one programmatic change
+  // Optional: donâ€™t pop suggestions for this one programmatic change
   suppressSuggestionsOnce = true;
 
   // Run the normal filtering pipeline
@@ -533,7 +533,7 @@ function updateSuggestions(q) {
   for (const m of unique) {
     const item = document.createElement("div");
     item.className = "suggestion-item";
-    item.textContent = `${m.label} · ${m.type}`;
+    item.textContent = `${m.label} Â· ${m.type}`;
 
     item.addEventListener("click", () => {
       const input = document.getElementById("searchInput");
@@ -662,7 +662,7 @@ function renderList() {
 
     container.appendChild(row);
   }
-  // If we later add prev/next buttons, we’d update them here
+  // If we later add prev/next buttons, weâ€™d update them here
   updatePaginationControls(totalPages, currentPage, effectivePageSize, totalMatches);
 }
 
@@ -727,7 +727,7 @@ function selectEntry(entry) {
   const backBtn = document.createElement("button");
   backBtn.type = "button";
   backBtn.className = "detail-back-button";
-  backBtn.textContent = "← Back to results";
+  backBtn.textContent = "â† Back to results";
 
   backBtn.addEventListener("click", () => {
     const layoutEl = document.querySelector(".results-layout");
@@ -806,11 +806,11 @@ function selectEntry(entry) {
 
   const parts = [];
   if (seenNorm === "seen") {
-    parts.push("Seen ✅");
+    parts.push("Seen âœ…");
   } else if (seenNorm === "unseen") {
-    parts.push("Not seen ❌");
+    parts.push("Not seen âŒ");
   } else if (seenNorm === "planning") {
-    parts.push("Planning / On-Hold 📝");
+    parts.push("Planning / On-Hold ðŸ“");
   }
   if (year) {
     parts.push(`Year: ${year}`);
@@ -819,12 +819,12 @@ function selectEntry(entry) {
     parts.push(`Appears in: ${appearsIn}`);
   }
 
-  meta.textContent = parts.join(" • ");
+  meta.textContent = parts.join(" â€¢ ");
   header.appendChild(meta);
 
   panel.appendChild(header);
 
-  // --- IMAGES – ONLY LOADED FOR THE SELECTED ENTRY ---
+  // --- IMAGES â€“ ONLY LOADED FOR THE SELECTED ENTRY ---
   const imagesWrapper = document.createElement("div");
   imagesWrapper.className = "detail-images";
 
@@ -921,7 +921,7 @@ function hookControls() {
   // "Show All" = bump pageSize up to the hard max, but DO NOT render 6000 rows
   if (showAllBtn) {
     showAllBtn.addEventListener("click", () => {
-      // Make sure we’re in list view on mobile
+      // Make sure weâ€™re in list view on mobile
       const layoutEl = document.querySelector(".results-layout");
       if (layoutEl) {
         layoutEl.classList.remove("detail-active");
@@ -952,7 +952,7 @@ function hookControls() {
       pageSize = DEFAULT_PAGE_SIZE;
       currentPage = 1;
 
-      // Make sure we’re in list view again on mobile
+      // Make sure weâ€™re in list view again on mobile
       const layoutEl = document.querySelector(".results-layout");
       if (layoutEl) {
         layoutEl.classList.remove("detail-active");
@@ -1034,7 +1034,7 @@ async function loadDataFor(language) {
     filteredEntries = [];
     selectedEntryId = null;
 
-    // 🔹 Optional: switching DBs also returns to list view
+    // ðŸ”¹ Optional: switching DBs also returns to list view
     const layoutEl = document.querySelector(".results-layout");
     if (layoutEl) {
       layoutEl.classList.remove("detail-active");
@@ -1083,3 +1083,4 @@ window.addEventListener("DOMContentLoaded", () => {
   // Default on startup: ENG DB
   selectLang(engBtn, "ENG");
 });
+
