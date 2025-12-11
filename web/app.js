@@ -826,7 +826,7 @@ function selectEntry(entry) {
 
   panel.appendChild(header);
 
-  // --- IMAGES â€“ ONLY LOADED FOR THE SELECTED ENTRY ---
+  // --- IMAGES – ONLY LOADED FOR THE SELECTED ENTRY ---
   const imagesWrapper = document.createElement("div");
   imagesWrapper.className = "detail-images";
 
