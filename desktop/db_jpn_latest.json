@@ -1,6 +1,6 @@
 ﻿{
-    "db_version":  "2025-12-12",
-    "notes":  "2025-12-12",
-    "db_url":  "https://github.com/cjw525/anime-va-updates/releases/download/db-jpn-2025-12-12/anime_va_jpn.db",
-    "sha256":  "68C74A4B59984E4224665CAED684D40284C6918CFAF2B1513C59F08B4A9977D9"
+    "db_version":  "2025-12-13",
+    "notes":  "2025-12-13",
+    "db_url":  "https://github.com/cjw525/anime-va-updates/releases/download/db-jpn-2025-12-13/anime_va_jpn.db",
+    "sha256":  "210CE363629348691B07BDB41CEB9DC4DED9DE496540608EEF37FDDBFDEE4E7D"
 }
