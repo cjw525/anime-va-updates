@@ -1,3 +1,4 @@
-Release 0.5.0.5
-- she's not showing me any imagesssss from the .db
-- updating the mobile images url cause I think that was the issue
+Release 0.5.0.6
+- FUCK github pages y'know what i MEANNNN
+- i don't have pages enabled for anime-va-images, so i have to use
+www.raw.githubusercontent.com, remember that shit for LATER girl
