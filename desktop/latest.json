@@ -1,8 +1,8 @@
 ﻿{
-    "version":  "0.5.0.4",
-    "notes":  "Release 0.5.0.4\r\n- I don\u0027t think I\u0027ve changed anything?\r\n- I got lost in the sauce, I\u0027m updating just to make sure the offical app matches my code lmao",
-    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.5.0.4/Anime.VA.Setup.0.5.0.4.exe",
-    "sha256":  "A960B5B0F9DB883263A93360FF7FF0194C3010127ECA4CE4202B8A827D08DD60",
-    "latest_version":  "0.5.0.4",
-    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.5.0.4/Anime.VA.Setup.0.5.0.4.exe"
+    "version":  "0.5.0.5",
+    "notes":  "Release 0.5.0.5\r\n- she\u0027s not showing me any imagesssss from the .db\r\n- updating the mobile images url cause I think that was the issue",
+    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.5.0.5/Anime.VA.Setup.0.5.0.5.exe",
+    "sha256":  "36942312EB19C9A8629C1CFAE0B3B57B3E135B679EFE9E91DB05E03D2762C0F4",
+    "latest_version":  "0.5.0.5",
+    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.5.0.5/Anime.VA.Setup.0.5.0.5.exe"
 }
