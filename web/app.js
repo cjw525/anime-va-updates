@@ -39,6 +39,10 @@ let langButtonsWired = false;
 
 const SYNC_API_KEY = "";
 
+function isReadOnlyProfile() {
+  return (activeProfileId || "").toLowerCase() === "guest";
+}
+
 function setActiveTab(tab) {
   if ((tab === "search" || tab === "list") && !activeProfileId) {
     const summary = document.getElementById("resultsSummary");
@@ -355,6 +359,11 @@ async function fetchProfileState(profileId) {
 }
 
 async function updateProfileEntry(entry, updates) {
+  if (isReadOnlyProfile()) {
+    console.log("Guest profile is read-only. Skipping update.");
+    return false;
+  }
+
   const key = makeEntryKey(entry);
 
   const payload = {
@@ -1282,7 +1291,11 @@ async function loadDataFor(language) {
       layoutEl.classList.remove("detail-active");
     }
     // Fetch remote profile state for seen status (read-only sync v0.1)
-    await fetchProfileState(activeProfileId);
+    if (!isReadOnlyProfile()) {
+      await fetchProfileState(activeProfileId);
+    } else {
+      activeProfileState = {};
+    }
 
     applyFilters();
 
