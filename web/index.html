@@ -15,10 +15,10 @@
     <header class="app-header app-header-tabs">
       <div class="topbar">
         <div class="tabs" role="tablist" aria-label="App tabs">
-          <button id="tabProfile" class="tab-btn" type="button" role="tab" aria-selected="false">
+          <button id="tabProfile" class="tab-btn" type="button" role="tab" aria-selected="true">
             Profile
           </button>
-          <button id="tabSearch" class="tab-btn selected" type="button" role="tab" aria-selected="true">
+          <button id="tabSearch" class="tab-btn selected" type="button" role="tab" aria-selected="false">
             Search
           </button>
           <button id="tabList" class="tab-btn" type="button" role="tab" aria-selected="false">
@@ -37,9 +37,9 @@
 
     <main class="app-main">
       <!-- APP CONTENT (hidden until profile chosen) -->
-      <section id="appScreen" class="screen" style="display:none;">
+      <section id="appScreen" class="screen">
         <!-- PROFILE PICKER (shown on launch) -->
-      <section id="profileScreen" class="screen">
+      <section id="profileView" class="view" style="display:none;">
         <h2 class="screen-title">Choose a profile</h2>
         <p class="summary-text">This is the “simple profile” mode — just pick a name.</p>
 
