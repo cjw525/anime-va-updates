@@ -48,7 +48,7 @@ function setActiveTab(tab) {
   if (langToggle) {
     langToggle.style.display = (tab === "profile") ? "none" : "flex";
   }
-  
+
   if ((tab === "search" || tab === "list") && !activeProfileId) {
     const summary = document.getElementById("resultsSummary");
     if (summary) summary.textContent = "Choose a profile first (Profile tab).";
@@ -171,6 +171,7 @@ function renderAnimeListView() {
   for (const r of rows) {
     const entries = r.entries;
 
+    // Compute years ONCE
     const { engYear, jpnYear } = computeAnimeYears(entries);
 
     const anySeen = entries.some((e) => normalizeSeen(getSeenValue(e)) === "seen");
@@ -189,8 +190,6 @@ function renderAnimeListView() {
 
     const actions = document.createElement("div");
     actions.className = "list-row-actions";
-
-    // 🔍 search button
     const btnSearch = document.createElement("button");
     btnSearch.type = "button";
     btnSearch.className = "icon-btn";
@@ -203,21 +202,20 @@ function renderAnimeListView() {
     });
 
     actions.appendChild(btnSearch);
-
     top.appendChild(title);
     top.appendChild(actions);
 
-    // Second line: Year badges + status badges (clickable)
+    // Second line: badges container (CREATE IT before appending)
     const badges = document.createElement("div");
     badges.className = "list-row-badges";
 
+    // Year badges
     if (engYear) {
       const b = document.createElement("span");
       b.className = "mini-badge badge-year";
       b.textContent = `ENG ${engYear}`;
       badges.appendChild(b);
     }
-
     if (jpnYear) {
       const b = document.createElement("span");
       b.className = "mini-badge badge-year";
@@ -265,6 +263,30 @@ function renderAnimeListView() {
     // IMPORTANT: Row itself does nothing now (no accidental navigation)
     container.appendChild(row);
   }
+}
+
+function pickYearString(entry) {
+  const y = getField(entry, ["year"], "");
+  const s = String(y || "").trim();
+  return s || "";
+}
+
+function computeAnimeYears(entries) {
+  let engYear = "";
+  let jpnYear = "";
+
+  for (const e of entries) {
+    const y = pickYearString(e);
+    if (!y) continue;
+
+    const src = (e.__srcLang || "").toUpperCase();
+    if (src === "ENG" && !engYear) engYear = y;
+    if (src === "JPN" && !jpnYear) jpnYear = y;
+
+    if (engYear && jpnYear) break;
+  }
+
+  return { engYear, jpnYear };
 }
 
 function wireLanguageButtonsOnce() {
