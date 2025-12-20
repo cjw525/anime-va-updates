@@ -30,6 +30,7 @@ const IMAGE_VERSION = "2025-12-12_13-33-40"; // for cache-busting if needed
 
 // Later we'll let users pick this; for now, just "jades"
 let activeProfileId = null;
+let activeProfileLabel = null;
 
 // Remote per-entry state keyed by "LANG-id"
 let activeProfileState = {};
@@ -189,12 +190,23 @@ function markLangSelected(lang) {
 }
 
 function updateProfileUi() {
+  const label = document.getElementById("activeProfileLabel");
   const pill = document.getElementById("profilePill");
 
   const hasProfile = !!activeProfileId;
 
+  const displayName = hasProfile
+    ? activeProfileLabel || activeProfileId
+    : null;
+
+  if (label) {
+    label.textContent = hasProfile
+      ? `Profile: ${displayName}`
+      : "Choose a profile to begin.";
+  }
+
   if (pill) {
-    pill.textContent = hasProfile ? activeProfileId : "No profile";
+    pill.textContent = hasProfile ? displayName : "No profile";
     pill.classList.toggle("is-empty", !hasProfile);
   }
 }
@@ -1312,6 +1324,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!profileId) return;
 
       activeProfileId = profileId;
+      activeProfileLabel = btn.testContent.trim();
       activeProfileState = {};
       updateProfileUi();
       // Make sure language buttons are wired exactly once
