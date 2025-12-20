@@ -29,12 +29,180 @@ const IMAGE_BASE_URL = "https://raw.githubusercontent.com/cjw525/anime-va-images
 const IMAGE_VERSION = "2025-12-12_13-33-40"; // for cache-busting if needed
 
 // Later we'll let users pick this; for now, just "jades"
-let activeProfileId = "jades";
+let activeProfileId = null;
 
 // Remote per-entry state keyed by "LANG-id"
 let activeProfileState = {};
 
+let langButtonsWired = false;
+
 const SYNC_API_KEY = "";
+
+function setActiveTab(tab) {
+  if ((tab === "search" || tab === "list") && !activeProfileId) {
+    const summary = document.getElementById("resultsSummary");
+    if (summary) summary.textContent = "Choose a profile first (Profile tab).";
+    tab = "profile";
+  }
+
+  const tabProfile = document.getElementById("tabProfile");
+  const tabSearch = document.getElementById("tabSearch");
+  const tabList = document.getElementById("tabList");
+
+  const profileView = document.getElementById("profileView");
+  const searchView = document.getElementById("searchView");
+  const listView = document.getElementById("listView");
+
+  const isProfile = tab === "profile";
+  const isSearch = tab === "search";
+  const isList = tab === "list";
+
+  // Tabs UI
+  if (tabProfile) {
+    tabProfile.classList.toggle("selected", isProfile);
+    tabProfile.setAttribute("aria-selected", isProfile ? "true" : "false");
+  }
+  if (tabSearch) {
+    tabSearch.classList.toggle("selected", isSearch);
+    tabSearch.setAttribute("aria-selected", isSearch ? "true" : "false");
+  }
+  if (tabList) {
+    tabList.classList.toggle("selected", isList);
+    tabList.setAttribute("aria-selected", isList ? "true" : "false");
+  }
+
+  // Views
+  if (profileView) profileView.style.display = isProfile ? "block" : "none";
+  if (searchView) searchView.style.display = isSearch ? "block" : "none";
+  if (listView) listView.style.display = isList ? "block" : "none";
+
+  // If they open List and we have data, render it
+  if (isList) renderAnimeListView();
+
+  // If they open Search with no profile chosen, be nice about it
+  if (isSearch && !activeProfileId) {
+    const summary = document.getElementById("resultsSummary");
+    if (summary) summary.textContent = "Choose a profile first (Profile tab).";
+  }
+}
+
+function renderAnimeListView() {
+  const container = document.getElementById("animeListContainer");
+  if (!container) return;
+
+  if (!allEntries.length) {
+    container.innerHTML = "<p class='summary-text'>No database loaded yet.</p>";
+    return;
+  }
+
+  // Build unique anime list with simple seen aggregation
+  const map = new Map(); // anime -> { anime, total, seenCount }
+  for (const entry of allEntries) {
+    const anime = getField(entry, ["anime"], "Unknown anime");
+    if (!map.has(anime)) {
+      map.set(anime, { anime, total: 0, seenCount: 0 });
+    }
+    const rec = map.get(anime);
+    rec.total += 1;
+
+    const seenRaw = getSeenValue(entry);
+    const seenNorm = normalizeSeen(seenRaw);
+    if (seenNorm === "seen") rec.seenCount += 1;
+  }
+
+  const rows = Array.from(map.values()).sort((a, b) =>
+    a.anime.toLowerCase().localeCompare(b.anime.toLowerCase())
+  );
+
+  container.innerHTML = "";
+
+  for (const r of rows) {
+    const row = document.createElement("div");
+    row.className = "result-row";
+
+    const main = document.createElement("div");
+    main.className = "result-main";
+
+    const title = document.createElement("span");
+    title.className = "result-title";
+    title.textContent = r.anime;
+
+    const meta = document.createElement("div");
+    meta.className = "result-meta";
+
+    const pct =
+      r.total > 0 ? Math.round((r.seenCount / r.total) * 100) : 0;
+
+    meta.textContent = `${r.seenCount}/${r.total} entries seen (${pct}%)`;
+
+    main.appendChild(title);
+    row.appendChild(main);
+    row.appendChild(meta);
+
+    row.addEventListener("click", () => {
+      // Jump to Search tab filtered to this anime
+      setActiveTab("search");
+      quickSearchFromText(r.anime);
+    });
+
+    container.appendChild(row);
+  }
+}
+
+function wireLanguageButtonsOnce() {
+  if (langButtonsWired) return;
+  langButtonsWired = true;
+
+  const engBtn = document.getElementById("langEng");
+  const jpnBtn = document.getElementById("langJpn");
+  const bothBtn = document.getElementById("langBoth");
+
+  if (engBtn)
+    engBtn.addEventListener("click", () => {
+      markLangSelected("ENG");
+      loadDataFor("ENG");
+    });
+
+  if (jpnBtn)
+    jpnBtn.addEventListener("click", () => {
+      markLangSelected("JPN");
+      loadDataFor("JPN");
+    });
+
+  if (bothBtn)
+    bothBtn.addEventListener("click", () => {
+      markLangSelected("BOTH");
+      loadDataFor("BOTH");
+    });
+}
+
+function markLangSelected(lang) {
+  const engBtn = document.getElementById("langEng");
+  const jpnBtn = document.getElementById("langJpn");
+  const bothBtn = document.getElementById("langBoth");
+
+  [engBtn, jpnBtn, bothBtn].forEach((b) => b && b.classList.remove("selected"));
+
+  if (lang === "ENG" && engBtn) engBtn.classList.add("selected");
+  if (lang === "JPN" && jpnBtn) jpnBtn.classList.add("selected");
+  if (lang === "BOTH" && bothBtn) bothBtn.classList.add("selected");
+}
+
+function updateProfileUi() {
+  const label = document.getElementById("activeProfileLabel");
+  const pill = document.getElementById("profilePill");
+
+  const hasProfile = !!activeProfileId;
+
+  if (label) {
+    label.textContent = hasProfile ? `Profile: ${activeProfileId}` : "Choose a profile to begin.";
+  }
+
+  if (pill) {
+    pill.textContent = hasProfile ? activeProfileId : "No profile";
+    pill.classList.toggle("is-empty", !hasProfile);
+  }
+}
 
 // --- Cache / SW helpers -----------------------------------------------------
 
@@ -1110,7 +1278,7 @@ async function loadDataFor(language) {
     await fetchProfileState(activeProfileId);
 
     applyFilters();
-    
+
     const container = document.getElementById("cardsContainer");
     if (container) {
       container.innerHTML =
@@ -1132,27 +1300,34 @@ async function loadDataFor(language) {
 window.addEventListener("DOMContentLoaded", () => {
   hookControls();
 
-  const engBtn = document.getElementById("langEng");
-  const jpnBtn = document.getElementById("langJpn");
-  const bothBtn = document.getElementById("langBoth");
+  const tabProfile = document.getElementById("tabProfile");
+  const tabSearch = document.getElementById("tabSearch");
+  const tabList = document.getElementById("tabList");
+  const profilePill = document.getElementById("profilePill");
+  
+  if (profilePill) profilePill.addEventListener("click", () => setActiveTab("profile"));
+  if (tabProfile) tabProfile.addEventListener("click", () => setActiveTab("profile"));
+  if (tabSearch) tabSearch.addEventListener("click", () => setActiveTab("search"));
+  if (tabList) tabList.addEventListener("click", () => setActiveTab("list"));
 
-  function selectLang(btn, lang) {
-    document
-      .querySelectorAll(".lang-btn")
-      .forEach(b => b.classList.remove("selected"));
+  // Profile chooser buttons (simple profiles)
+  document.querySelectorAll(".profile-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const profileId = btn.getAttribute("data-profile");
+      if (!profileId) return;
 
-    btn.classList.add("selected");
-    loadDataFor(lang);
-  }
+      activeProfileId = profileId;
+      activeProfileState = {};
+      updateProfileUi();
+      // Make sure language buttons are wired exactly once
+      wireLanguageButtonsOnce();
+      setActiveTab("search");
+      markLangSelected("ENG");
+      loadDataFor("ENG");
+    });
+  });
 
-  engBtn.addEventListener("click", () => selectLang(engBtn, "ENG"));
-  jpnBtn.addEventListener("click", () => selectLang(jpnBtn, "JPN"));
-  bothBtn.addEventListener("click", () => selectLang(bothBtn, "BOTH"));
-
-  // Default on startup: ENG DB
-  selectLang(engBtn, "ENG");
+  // On launch, open Profile tab (so they must choose)
+  setActiveTab("profile");
+  updateProfileUi();
 });
-
-
-
-

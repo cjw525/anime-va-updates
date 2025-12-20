@@ -1,4 +1,4 @@
-const CACHE_NAME = "anime-va-cache-v13";
+const CACHE_NAME = "anime-va-cache-v14";
 
 const URLS_TO_CACHE = [
   "/anime-va-updates/web/",
@@ -8,7 +8,8 @@ const URLS_TO_CACHE = [
   "/anime-va-updates/web/manifest.webmanifest",
   "/anime-va-updates/web/icons/icon-192.png",
   "/anime-va-updates/web/icons/icon-512.png",
-  "/anime-va-updates/data/anime_va_mobile.json"
+  "/anime-va-updates/data/anime_va_eng.json",
+  "/anime-va-updates/data/anime_va_jpn.json",
 ];
 
 self.addEventListener("install", event => {

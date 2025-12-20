@@ -499,3 +499,87 @@ button.danger:hover {
   background: #ff8dcf;
   color: black;
 }
+
+/* ===== Tabs header ===== */
+
+.app-header-tabs {
+  padding: 0.9rem 1.25rem 0.75rem;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+}
+
+.tab-btn {
+  flex: 1 1 0;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #6666aa;
+  background: #2a2a50;
+  color: #ffebff;
+}
+
+.tab-btn.selected {
+  border-color: #ff8dcf;
+  background: #ff8dcf22;
+}
+
+.header-sub {
+  margin-top: 0.55rem;
+}
+
+/* ===== Screens / Profile chooser ===== */
+
+.screen-title {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.15rem;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.profile-btn {
+  padding: 0.75rem;
+  border-radius: 0.9rem;
+  border: 1px solid #ff8dcf;
+  background: #241526;
+  font-size: 1rem;
+}
+
+.profile-btn:hover {
+  background: #302536;
+}
+
+.profile-pill {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid #ff8dcf;
+  background: #241526;
+  color: #ffebff;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.profile-pill.is-empty {
+  opacity: 0.75;
+  border-style: dashed;
+}
+
+/* ===== Views ===== */
+
+.view {
+  display: block;
+}

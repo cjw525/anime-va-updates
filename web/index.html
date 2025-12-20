@@ -12,118 +12,164 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <header class="app-header">
-      <h1>Anime VA Directory (Mobile)</h1>
-      <p class="subtitle">
-        Search your voice actor database from the couch.
-      </p>
+    <header class="app-header app-header-tabs">
+      <div class="topbar">
+        <div class="tabs" role="tablist" aria-label="App tabs">
+          <button id="tabProfile" class="tab-btn" type="button" role="tab" aria-selected="false">
+            Profile
+          </button>
+          <button id="tabSearch" class="tab-btn selected" type="button" role="tab" aria-selected="true">
+            Search
+          </button>
+          <button id="tabList" class="tab-btn" type="button" role="tab" aria-selected="false">
+            List
+          </button>
+          <button id="profilePill" class="profile-pill" type="button" title="Change profile">
+            No profile
+          </button>
+        </div>
+      </div>
+
+      <div class="header-sub">
+        <div id="activeProfileLabel" class="subtitle">Choose a profile to begin.</div>
+      </div>
     </header>
 
     <main class="app-main">
-      <!-- Language toggle -->
-      <section class="lang-toggle">
-        <button id="langEng" class="lang-btn selected">ENG</button>
-        <button id="langJpn" class="lang-btn">JPN</button>
-        <button id="langBoth" class="lang-btn">Both</button>
+      <!-- APP CONTENT (hidden until profile chosen) -->
+      <section id="appScreen" class="screen" style="display:none;">
+        <!-- PROFILE PICKER (shown on launch) -->
+      <section id="profileScreen" class="screen">
+        <h2 class="screen-title">Choose a profile</h2>
+        <p class="summary-text">This is the “simple profile” mode — just pick a name.</p>
+
+        <div class="profile-grid">
+          <button class="profile-btn" type="button" data-profile="jades">Jades</button>
+          <button class="profile-btn" type="button" data-profile="aly">Aly</button>
+          <button class="profile-btn" type="button" data-profile="logan">Logan</button>
+          <button class="profile-btn" type="button" data-profile="bridget">Bridget</button>
+          <button class="profile-btn" type="button" data-profile="guest">Guest</button>
+        </div>
       </section>
-      <!-- Controls -->
-      <section class="controls">
-        <!-- SEARCH -->
-        <div class="control-row">
-          <div class="control-group search-group">
-            <label for="searchInput">Search</label>
-            <div class="search-wrapper">
-              <input
-                id="searchInput"
-                type="text"
-                placeholder="Anime, character, or VA name..."
-              />
-              <div id="searchSuggestions" class="search-suggestions"></div>
+      <!-- SEARCH VIEW -->
+      <section id="searchView" class="view">
+        <!-- Language toggle (moved here so it’s “top of Search tab”) -->
+        <section class="lang-toggle">
+          <button id="langEng" class="lang-btn selected" type="button">ENG</button>
+          <button id="langJpn" class="lang-btn" type="button">JPN</button>
+          <button id="langBoth" class="lang-btn" type="button">Both</button>
+        </section>
+
+        <!-- Controls -->
+        <section class="controls">
+          <!-- SEARCH -->
+          <div class="control-row">
+            <div class="control-group search-group">
+              <label for="searchInput">Search</label>
+              <div class="search-wrapper">
+                <input
+                  id="searchInput"
+                  type="text"
+                  placeholder="Anime, character, or VA name..."
+                />
+                <div id="searchSuggestions" class="search-suggestions"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FILTERS -->
+          <div class="control-row">
+            <div class="control-group">
+              <label for="seenFilter">Seen status</label>
+              <select id="seenFilter">
+                <option value="all">All</option>
+                <option value="seen">Seen</option>
+                <option value="unseen">Unseen</option>
+                <option value="planning">Planning / On-Hold</option>
+              </select>
+            </div>  
+            <div class="control-group">
+              <label for="typeFilter">Media type</label>
+              <select id="typeFilter">
+                <option value="all">All</option>
+                <option value="tv">TV</option>
+                <option value="movie">Movie</option>
+                <option value="ova">OVA</option>
+                <option value="ona">ONA</option>
+                <option value="special">Special</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="control-group checkbox-group">
+              <input id="hasImageFilter" type="checkbox" />
+              <label for="hasImageFilter">Only entries with images</label>
+            </div>
+
+            <div class="control-group">
+              <label for="sortSelect">Sort by</label>
+              <select id="sortSelect">
+                <option value="anime">Anime title (A–Z)</option>
+                <option value="character">Character name (A–Z)</option>
+                <option value="va">VA name (A–Z)</option>
+              </select>
+            </div>
+          </div>  
+          <div class="control-row buttons-row">
+            <button id="showAllBtn" type="button">Show All (keep filters)</button>
+            <button id="clearAllBtn" type="button" class="secondary">
+              Clear All Filters
+            </button>
+            <button id="clearCacheBtn" type="button" class="secondary danger">
+              Clear App Cache
+            </button>
+          </div>
+
+          <div class="control-row">
+            <p id="clearCacheStatus" class="summary-text"></p>
+          </div>
+
+          <div class="control-row">
+            <p id="resultsSummary" class="summary-text">
+              Choose a profile to load the database...
+            </p>
+          </div>
+        </section>
+
+        <!-- Results + detail -->
+        <section class="results-layout">
+          <div id="cardsContainer" class="results-list"></div>
+
+          <div id="paginationControls" class="pagination">
+            <button id="prevPageBtn" type="button">← Prev</button>
+            <span id="pageInfo" class="page-info"></span>
+            <button id="nextPageBtn" type="button">Next →</button>
+          </div>
+
+          <aside id="detailPanel" class="detail-panel">
+            <p class="summary-text">Select an entry to see details and images.</p>
+          </aside>
+        </section>
+      </section>
+
+      <!-- LIST VIEW -->
+      <section id="listView" class="view" style="display:none;">
+        <div class="controls">
+          <div class="control-row" style="margin-bottom:0;">
+            <div class="control-group">
+              <label>Anime list</label>
+              <p class="summary-text" style="margin:0;">
+                Tap an anime to jump to Search filtered to that title.
+              </p>
             </div>
           </div>
         </div>
 
-        <!-- FILTERS -->
-        <div class="control-row">
-          <div class="control-group">
-            <label for="seenFilter">Seen status</label>
-            <select id="seenFilter">
-              <option value="all">All</option>
-              <option value="seen">Seen</option>
-              <option value="unseen">Unseen</option>
-              <option value="planning">Planning / On-Hold</option>
-            </select>
-          </div>
-
-          <div class="control-group">
-            <label for="typeFilter">Media type</label>
-            <select id="typeFilter">
-              <option value="all">All</option>
-              <option value="tv">TV</option>
-              <option value="movie">Movie</option>
-              <option value="ova">OVA</option>
-              <option value="ona">ONA</option>
-              <option value="special">Special</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="control-row">
-          <div class="control-group checkbox-group">
-            <input id="hasImageFilter" type="checkbox" />
-            <label for="hasImageFilter">Only entries with images</label>
-          </div>
-
-          <div class="control-group">
-            <label for="sortSelect">Sort by</label>
-            <select id="sortSelect">
-              <option value="anime">Anime title (A–Z)</option>
-              <option value="character">Character name (A–Z)</option>
-              <option value="va">VA name (A–Z)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="control-row buttons-row">
-          <button id="showAllBtn" type="button">Show All (keep filters)</button>
-          <button id="clearAllBtn" type="button" class="secondary">
-            Clear All Filters
-          </button>
-          <button id="clearCacheBtn" type="button" class="secondary danger">
-            Clear App Cache
-          </button>
-        </div>
-
-        <div class="control-row">
-          <p id="clearCacheStatus" class="summary-text"></p>
-        </div>
-
-        <div class="control-row">
-          <p id="resultsSummary" class="summary-text">
-            Database loading...
-          </p>
-        </div>
+        <div id="animeListContainer" class="results-list"></div>
       </section>
-
-      <!-- Results + detail -->
-      <section class="results-layout">
-        <div id="cardsContainer" class="results-list">
-          <!-- Result rows rendered here via JS -->
-        </div>
-
-        <div id="paginationControls" class="pagination">
-          <button id="prevPageBtn" type="button">← Prev</button>
-          <span id="pageInfo" class="page-info"></span>
-          <button id="nextPageBtn" type="button">Next →</button>
-        </div>
-
-        <aside id="detailPanel" class="detail-panel">
-          <p class="summary-text">
-            Select an entry to see details and images.
-          </p>
-        </aside>
-      </section>
-    </main>
+    </section>
+  </main>
 
     <script src="app.js"></script>
     <script>
