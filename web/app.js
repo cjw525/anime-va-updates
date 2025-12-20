@@ -1337,7 +1337,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!profileId) return;
 
       activeProfileId = profileId;
-      activeProfileLabel = btn.testContent.trim();
+      activeProfileLabel = btn.textContent.trim();
       activeProfileState = {};
       updateProfileUi();
       // Make sure language buttons are wired exactly once
