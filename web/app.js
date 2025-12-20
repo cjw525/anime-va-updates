@@ -1109,6 +1109,8 @@ async function loadDataFor(language) {
     // Fetch remote profile state for seen status (read-only sync v0.1)
     await fetchProfileState(activeProfileId);
 
+    applyFilters();
+    
     const container = document.getElementById("cardsContainer");
     if (container) {
       container.innerHTML =
