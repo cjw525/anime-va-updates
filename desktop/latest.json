@@ -1,8 +1,8 @@
 ﻿{
-    "version":  "0.5.0.6",
-    "notes":  "Release 0.5.0.6\r\n- FUCK github pages y\u0027know what i MEANNNN\r\n- i don\u0027t have pages enabled for anime-va-images, so i have to use\r\nwww.raw.githubusercontent.com, remember that shit for LATER girl",
-    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.5.0.6/Anime.VA.Setup.0.5.0.6.exe",
-    "sha256":  "8B9FC02723CAE71CC80D8F92E7C178736D22844FA2FEA8AA406F2D0F9D6BF7B3",
-    "latest_version":  "0.5.0.6",
-    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.5.0.6/Anime.VA.Setup.0.5.0.6.exe"
+    "version":  "0.5.0.7",
+    "notes":  "Release 0.5.0.7\r\n- tryna fix year data garbagio",
+    "installer_url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.5.0.7/Anime.VA.Setup.0.5.0.7.exe",
+    "sha256":  "7E9312C6D0D0D7C9F5D094DF8E31154CCE4A8B97A71444552C5979D2F9F80226",
+    "latest_version":  "0.5.0.7",
+    "url":  "https://github.com/cjw525/anime-va-updates/releases/download/v0.5.0.7/Anime.VA.Setup.0.5.0.7.exe"
 }

@@ -1,4 +1,2 @@
-Release 0.5.0.6
-- FUCK github pages y'know what i MEANNNN
-- i don't have pages enabled for anime-va-images, so i have to use
-www.raw.githubusercontent.com, remember that shit for LATER girl
+Release 0.5.0.7
+- tryna fix year data garbagio
