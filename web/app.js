@@ -189,14 +189,9 @@ function markLangSelected(lang) {
 }
 
 function updateProfileUi() {
-  const label = document.getElementById("activeProfileLabel");
   const pill = document.getElementById("profilePill");
 
   const hasProfile = !!activeProfileId;
-
-  if (label) {
-    label.textContent = hasProfile ? `Profile: ${activeProfileId}` : "Choose a profile to begin.";
-  }
 
   if (pill) {
     pill.textContent = hasProfile ? activeProfileId : "No profile";
