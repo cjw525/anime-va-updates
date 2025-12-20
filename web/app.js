@@ -178,6 +178,49 @@ async function fetchProfileState(profileId) {
   }
 }
 
+async function updateProfileEntry(entry, updates) {
+  const key = makeEntryKey(entry);
+
+  const payload = {
+    device_id: "mobile-pwa",
+    updates: [
+      {
+        key,
+        seen: updates.seen ?? false,
+        tbr: updates.tbr ?? false,
+        updated: new Date().toISOString()
+      }
+    ]
+  };
+
+  const headers = { "Content-Type": "application/json" };
+  if (SYNC_API_KEY) headers["X-API-Key"] = SYNC_API_KEY;
+
+  const resp = await fetch(
+    `${SYNC_API_BASE}/profiles/${activeProfileId}/entries`,
+    {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify(payload)
+    }
+  );
+
+  if (!resp.ok) {
+    console.error("Failed to update profile entry", await resp.text());
+    return false;
+  }
+
+  // Optimistic local update
+  activeProfileState[key] = {
+    seen: payload.updates[0].seen,
+    tbr: payload.updates[0].tbr,
+    updated: payload.updates[0].updated,
+    updated_by: payload.device_id
+  };
+
+  return true;
+}
+
 // No media type in mobile JSON yet; leave this as a stub.
 function normalizeType(valueRaw) {
   return "";
@@ -825,6 +868,23 @@ function selectEntry(entry) {
   header.appendChild(meta);
 
   panel.appendChild(header);
+
+  const controls = document.createElement("div");
+  controls.className = "detail-controls";
+
+  const seenBtn = document.createElement("button");
+  seenBtn.textContent =
+    seenNorm === "seen" ? "Mark Unseen ❌" : "Mark Seen ✅";
+
+  seenBtn.addEventListener("click", async () => {
+    const newSeen = seenNorm !== "seen";
+    await updateProfileEntry(entry, { seen: newSeen, tbr: false });
+    applyFilters(); // re-render list + filters
+    selectEntry(entry); // refresh detail panel
+  });
+
+  controls.appendChild(seenBtn);
+  panel.appendChild(controls);
 
   // --- IMAGES – ONLY LOADED FOR THE SELECTED ENTRY ---
   const imagesWrapper = document.createElement("div");
