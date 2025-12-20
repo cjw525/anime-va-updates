@@ -578,6 +578,76 @@ button.danger:hover {
   border-style: dashed;
 }
 
+.list-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.list-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.icon-btn {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid #6666aa;
+  background: #2a2a50;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.list-row-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.mini-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid #3a3a5a;
+  background: #202036;
+  font-size: 0.75rem;
+  color: #dcdcf5;
+}
+
+.badge-year {
+  border-color: #6666aa;
+}
+
+.mini-badge-btn {
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+/* TBR badge states */
+.badge-tbr {
+  border: 1px solid #ff8dcf;
+  background: #ff8dcf22;
+  color: #ffebff;
+}
+
+.badge-tbr-off {
+  border: 1px solid #3a3a5a;
+  background: #202036;
+  color: #dcdcf5;
+}
+
+.mini-badge-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* ===== Views ===== */
 
 .view {

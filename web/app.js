@@ -91,6 +91,55 @@ function setActiveTab(tab) {
   }
 }
 
+function pickYearString(entry) {
+  // Your entries currently use "year"
+  const y = getField(entry, ["year"], "");
+  const s = String(y || "").trim();
+  return s || "";
+}
+
+function computeAnimeYears(entries) {
+  let engYear = "";
+  let jpnYear = "";
+
+  for (const e of entries) {
+    const y = pickYearString(e);
+    if (!y) continue;
+
+    const src = (e.__srcLang || "").toUpperCase();
+    if (src === "ENG" && !engYear) engYear = y;
+    if (src === "JPN" && !jpnYear) jpnYear = y;
+
+    if (engYear && jpnYear) break;
+  }
+
+  return { engYear, jpnYear };
+}
+
+async function bulkSetAnimeSeen(entries, seenValue) {
+  if (!entries?.length) return;
+  if (isReadOnlyProfile && isReadOnlyProfile()) return;
+
+  for (const e of entries) {
+    await updateProfileEntry(e, { seen: !!seenValue, tbr: false });
+  }
+
+  applyFilters();
+  renderAnimeListView();
+}
+
+async function bulkSetAnimeTbr(entries, tbrValue) {
+  if (!entries?.length) return;
+  if (isReadOnlyProfile && isReadOnlyProfile()) return;
+
+  for (const e of entries) {
+    await updateProfileEntry(e, { seen: false, tbr: !!tbrValue });
+  }
+
+  applyFilters();
+  renderAnimeListView();
+}
+
 function renderAnimeListView() {
   const container = document.getElementById("animeListContainer");
   if (!container) return;
@@ -100,19 +149,12 @@ function renderAnimeListView() {
     return;
   }
 
-  // Build unique anime list with simple seen aggregation
-  const map = new Map(); // anime -> { anime, total, seenCount }
+  // Group entries by anime
+  const map = new Map(); // anime -> { anime, entries: [] }
   for (const entry of allEntries) {
     const anime = getField(entry, ["anime"], "Unknown anime");
-    if (!map.has(anime)) {
-      map.set(anime, { anime, total: 0, seenCount: 0 });
-    }
-    const rec = map.get(anime);
-    rec.total += 1;
-
-    const seenRaw = getSeenValue(entry);
-    const seenNorm = normalizeSeen(seenRaw);
-    if (seenNorm === "seen") rec.seenCount += 1;
+    if (!map.has(anime)) map.set(anime, { anime, entries: [] });
+    map.get(anime).entries.push(entry);
   }
 
   const rows = Array.from(map.values()).sort((a, b) =>
@@ -122,34 +164,100 @@ function renderAnimeListView() {
   container.innerHTML = "";
 
   for (const r of rows) {
+    const entries = r.entries;
+
+    const { engYear, jpnYear } = computeAnimeYears(entries);
+
+    const anySeen = entries.some((e) => normalizeSeen(getSeenValue(e)) === "seen");
+    const anyTbr = entries.some((e) => !!getTbrValue(e));
+
     const row = document.createElement("div");
     row.className = "result-row";
 
-    const main = document.createElement("div");
-    main.className = "result-main";
+    // Top line: Title + actions (🔍)
+    const top = document.createElement("div");
+    top.className = "list-row-top";
 
-    const title = document.createElement("span");
+    const title = document.createElement("div");
     title.className = "result-title";
     title.textContent = r.anime;
 
-    const meta = document.createElement("div");
-    meta.className = "result-meta";
+    const actions = document.createElement("div");
+    actions.className = "list-row-actions";
 
-    const pct =
-      r.total > 0 ? Math.round((r.seenCount / r.total) * 100) : 0;
-
-    meta.textContent = `${r.seenCount}/${r.total} entries seen (${pct}%)`;
-
-    main.appendChild(title);
-    row.appendChild(main);
-    row.appendChild(meta);
-
-    row.addEventListener("click", () => {
-      // Jump to Search tab filtered to this anime
+    // 🔍 search button
+    const btnSearch = document.createElement("button");
+    btnSearch.type = "button";
+    btnSearch.className = "icon-btn";
+    btnSearch.title = "Search this anime";
+    btnSearch.textContent = "🔍";
+    btnSearch.addEventListener("click", (ev) => {
+      ev.stopPropagation();
       setActiveTab("search");
       quickSearchFromText(r.anime);
     });
 
+    actions.appendChild(btnSearch);
+
+    top.appendChild(title);
+    top.appendChild(actions);
+
+    // Second line: Year badges + status badges (clickable)
+    const badges = document.createElement("div");
+    badges.className = "list-row-badges";
+
+    if (engYear) {
+      const b = document.createElement("span");
+      b.className = "mini-badge badge-year";
+      b.textContent = `ENG ${engYear}`;
+      badges.appendChild(b);
+    }
+
+    if (jpnYear) {
+      const b = document.createElement("span");
+      b.className = "mini-badge badge-year";
+      b.textContent = `JPN ${jpnYear}`;
+      badges.appendChild(b);
+    }
+
+    // Seen badge (click to toggle)
+    const seenBtn = document.createElement("button");
+    seenBtn.type = "button";
+    seenBtn.className = `mini-badge-btn ${anySeen ? "badge-seen" : "badge-unseen"}`;
+    seenBtn.textContent = anySeen ? "Seen" : "Unseen";
+    seenBtn.title = "Toggle Seen for this anime";
+    seenBtn.addEventListener("click", async (ev) => {
+      ev.stopPropagation();
+      await bulkSetAnimeSeen(entries, !anySeen);
+    });
+
+    // TBR badge (click to toggle)
+    const tbrBtn = document.createElement("button");
+    tbrBtn.type = "button";
+    tbrBtn.className = `mini-badge-btn ${anyTbr ? "badge-tbr" : "badge-tbr-off"}`;
+    tbrBtn.textContent = anyTbr ? "TBR" : "TBR";
+    tbrBtn.title = "Toggle TBR for this anime";
+    tbrBtn.addEventListener("click", async (ev) => {
+      ev.stopPropagation();
+      await bulkSetAnimeTbr(entries, !anyTbr);
+    });
+
+    // Guest lock
+    const readOnly = (typeof isReadOnlyProfile === "function") && isReadOnlyProfile();
+    if (readOnly) {
+      seenBtn.disabled = true;
+      tbrBtn.disabled = true;
+      seenBtn.title = "Guest is read-only";
+      tbrBtn.title = "Guest is read-only";
+    }
+
+    badges.appendChild(seenBtn);
+    badges.appendChild(tbrBtn);
+
+    row.appendChild(top);
+    row.appendChild(badges);
+
+    // IMPORTANT: Row itself does nothing now (no accidental navigation)
     container.appendChild(row);
   }
 }
@@ -332,6 +440,18 @@ function getSeenValue(entry) {
 
   // Fallback to whatever is in the JSON
   return entry["seen"];
+}
+
+function getTbrValue(entry) {
+  const key = makeEntryKey(entry);
+  const remote = activeProfileState[key];
+
+  if (remote && typeof remote.tbr === "boolean") {
+    return remote.tbr;
+  }
+
+  // Fallback to whatever is in the JSON
+  return entry["tbr"];
 }
 
 async function fetchProfileState(profileId) {
@@ -1278,7 +1398,9 @@ async function loadDataFor(language) {
         }
       });
 
-      combined = combined.concat(arr);
+      const srcLang = url.includes("_eng") ? "ENG" : url.includes("_jpn") ? "JPN" : "";
+      const tagged = (arr || []).map((e) => ({ ...e, __srcLang: srcLang }));
+      combined = combined.concat(tagged);
     }
 
     allEntries = combined;
