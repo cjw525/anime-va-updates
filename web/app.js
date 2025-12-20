@@ -3,6 +3,7 @@
 
 let allEntries = [];
 let filteredEntries = [];
+let filteredEntriesAll = [];
 let selectedEntryId = null;
 let suggestionsContainer = null;
 
@@ -388,6 +389,8 @@ function applyFilters() {
   // How many entries actually matched all filters
   filteredTotalCount = results.length;
 
+  filteredEntriesAll = results;
+
   // "Default" state = no search text, no special filters
   const isSearchBlank = !qNorm;
   const isDefaultFilters =
@@ -398,20 +401,20 @@ function applyFilters() {
   // Adjust this to taste
   const CLAMP_LIMIT = 250;
 
-  // Decide how big each page should be
+  // Decide clamp
   if (isSearchBlank && isDefaultFilters && results.length > CLAMP_LIMIT) {
-    // Default landing view of a huge DB: clamp to CLAMP_LIMIT rows per page
-    pageSize = Math.min(CLAMP_LIMIT, MAX_ROWS_PER_PAGE);
     filteredClamped = true;
-  } else {
-    // Searching / filtering / or manageable result set:
-    // use a saner base page size, still respecting the hard cap
-    pageSize = Math.min(DEFAULT_PAGE_SIZE, MAX_ROWS_PER_PAGE);
-    filteredClamped = false;
-  }
 
-  // Store ALL matches; renderList will choose which slice to display
-  filteredEntries = results;
+    // Clamp DISPLAY list to first CLAMP_LIMIT
+    filteredEntries = results.slice(0, CLAMP_LIMIT);
+
+    // Page size stays capped by your render safety limit
+    pageSize = Math.min(DEFAULT_PAGE_SIZE, MAX_ROWS_PER_PAGE);
+  } else {
+    filteredClamped = false;
+    filteredEntries = results;
+    pageSize = Math.min(DEFAULT_PAGE_SIZE, MAX_ROWS_PER_PAGE);
+  }
 
   // New filter/search = go back to first page and clear selection
   currentPage = 1;
@@ -420,6 +423,7 @@ function applyFilters() {
   renderList();
   updateSummary();
   clearDetailPanelIfNeeded();
+
   // NEW: auto-open only when there is EXACTLY ONE result,
   // and the user actually searched or changed filters
   const shouldAutoOpenSingle =
@@ -437,53 +441,53 @@ function updateSummary() {
 
   const totalInDb = allEntries.length;
 
-  // How many entries match current search/filters total
-  const totalMatches =
-    (typeof filteredTotalCount === "number" && filteredTotalCount > 0)
-      ? filteredTotalCount
-      : filteredEntries.length;
-
   // No DB loaded yet
   if (!totalInDb) {
     summary.textContent = "Loading database...";
     return;
   }
 
+  // Total matches across ALL filters (truth)
+  const totalMatchesAll =
+    (typeof filteredTotalCount === "number" && filteredTotalCount >= 0)
+      ? filteredTotalCount
+      : (Array.isArray(filteredEntriesAll) ? filteredEntriesAll.length : filteredEntries.length);
+
+  // What we're actually paging through right now
+  const totalForPaging = filteredClamped ? filteredEntries.length : totalMatchesAll;
+
   // DB loaded but nothing matches
-  if (!totalMatches) {
+  if (!totalMatchesAll) {
     summary.textContent =
       "Database loaded. Type in the search box or use filters to see entries.";
     return;
   }
 
-  // Figure out current page + how many are actually visible on this page
   const effectivePageSize = Math.min(pageSize || DEFAULT_PAGE_SIZE, MAX_ROWS_PER_PAGE);
+
   const totalPages =
     effectivePageSize > 0
-      ? Math.max(1, Math.ceil(totalMatches / effectivePageSize))
+      ? Math.max(1, Math.ceil(totalForPaging / effectivePageSize))
       : 1;
 
-  const safeCurrentPage = Math.min(
-    Math.max(currentPage || 1, 1),
-    totalPages
-  );
+  const safeCurrentPage = Math.min(Math.max(currentPage || 1, 1), totalPages);
 
   const startIndex = (safeCurrentPage - 1) * effectivePageSize;
-  const endIndex = Math.min(startIndex + effectivePageSize, totalMatches);
+  const endIndex = Math.min(startIndex + effectivePageSize, totalForPaging);
   const shownNow = Math.max(0, endIndex - startIndex);
 
-  // Clamped "default view" of a giant DB
-  if (filteredClamped && totalMatches > shownNow) {
+  if (filteredClamped) {
+    // We're paging through ONLY the clamped display slice (e.g. first 250)
     summary.textContent =
-      `Showing first ${shownNow} of ${totalMatches} matching entries ` +
+      `Showing ${shownNow} of the first ${totalForPaging} matching entries ` +
       `(page ${safeCurrentPage} of ${totalPages}). ` +
-      `Add a search or filters, or use Next / "Show All" to see more.`;
+      `There are ${totalMatchesAll} total matches — click "Show All" to page through everything.`;
   } else {
-    // Normal case
+    // Normal case: paging through all matches
     summary.textContent =
       `Showing ${shownNow} of ${totalInDb} entries ` +
       `(page ${safeCurrentPage} of ${totalPages}, ` +
-      `${totalMatches} match your filters).`;
+      `${totalMatchesAll} match your filters).`;
   }
 }
 
@@ -983,15 +987,16 @@ function hookControls() {
   // "Show All" = bump pageSize up to the hard max, but DO NOT render 6000 rows
   if (showAllBtn) {
     showAllBtn.addEventListener("click", () => {
-      // Make sure we're in list view on mobile
       const layoutEl = document.querySelector(".results-layout");
-      if (layoutEl) {
-        layoutEl.classList.remove("detail-active");
-      }
+      if (layoutEl) layoutEl.classList.remove("detail-active");
 
-      // Keep current search/filters, just show the biggest safe page
-      pageSize = MAX_ROWS_PER_PAGE;
+      // UNCLAMP: show ALL matches (but still page + respect render cap)
       filteredClamped = false;
+      filteredEntries = filteredEntriesAll;
+
+      // Keep your per-page safety limit
+      pageSize = Math.min(pageSize || DEFAULT_PAGE_SIZE, MAX_ROWS_PER_PAGE);
+
       currentPage = 1;
 
       renderList();
