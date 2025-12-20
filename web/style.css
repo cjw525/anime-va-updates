@@ -500,6 +500,12 @@ button.danger:hover {
   color: black;
 }
 
+.lang-toggle {
+  border-bottom: 1px solid #3a3a5a;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
 /* ===== Tabs header ===== */
 
 .app-header-tabs {

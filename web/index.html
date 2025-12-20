@@ -36,6 +36,12 @@
     </header>
 
     <main class="app-main">
+      <!-- Global language selector -->
+      <section class="lang-toggle">
+        <button id="langEng" class="lang-btn selected" type="button">ENG</button>
+        <button id="langJpn" class="lang-btn" type="button">JPN</button>
+        <button id="langBoth" class="lang-btn" type="button">Both</button>
+      </section>
       <!-- APP CONTENT (hidden until profile chosen) -->
       <section id="appScreen" class="screen">
         <!-- PROFILE PICKER (shown on launch) -->
@@ -53,13 +59,6 @@
       </section>
       <!-- SEARCH VIEW -->
       <section id="searchView" class="view">
-        <!-- Language toggle (moved here so it’s “top of Search tab”) -->
-        <section class="lang-toggle">
-          <button id="langEng" class="lang-btn selected" type="button">ENG</button>
-          <button id="langJpn" class="lang-btn" type="button">JPN</button>
-          <button id="langBoth" class="lang-btn" type="button">Both</button>
-        </section>
-
         <!-- Controls -->
         <section class="controls">
           <!-- SEARCH -->

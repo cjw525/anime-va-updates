@@ -44,6 +44,11 @@ function isReadOnlyProfile() {
 }
 
 function setActiveTab(tab) {
+  const langToggle = document.querySelector(".lang-toggle");
+  if (langToggle) {
+    langToggle.style.display = (tab === "profile") ? "none" : "flex";
+  }
+  
   if ((tab === "search" || tab === "list") && !activeProfileId) {
     const summary = document.getElementById("resultsSummary");
     if (summary) summary.textContent = "Choose a profile first (Profile tab).";
