@@ -1,2 +1,2 @@
-Release 0.5.0.7
-- tryna fix year data garbagio
+Release 0.5.0.8
+- STILL tryna fix year data garbagio
