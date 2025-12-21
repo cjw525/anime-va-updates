@@ -39,6 +39,20 @@ let langButtonsWired = false;
 
 const SYNC_API_KEY = "";
 
+const ANIME_TITLE_OVERRIDES = {
+  "Fullmetal Alchemist Brotherhood": "Fullmetal Alchemist: Brotherhood",
+  "Howls Moving Castle": "Howl's Moving Castle",
+  "Jojos Bizarre Adventure": "JoJo's Bizarre Adventure",
+  "Kikis Delivery Service": "Kiki's Delivery Service",
+  "Naruto Shippuden": "Naruto: Shippuden",
+  "RIN Daughters of Mnemosyne": "RIN: Daughters of Mnemosyne",
+  "That Time I Got Reincarnated as" : "That Time I Got Reincarnated as a Slime",
+  "The Ancient Magus Bride": "The Ancient Magus' Bride",
+  "Tokyo Ghoul Re": "Tokyo Ghoul:re",
+  "Tokyo Ghoul Root A": "Tokyo Ghoul: Root A",
+  "Wolfs Rain": "Wolf's Rain",
+}
+
 function isReadOnlyProfile() {
   return (activeProfileId || "").toLowerCase() === "guest";
 }
@@ -263,6 +277,24 @@ function renderAnimeListView() {
     // IMPORTANT: Row itself does nothing now (no accidental navigation)
     container.appendChild(row);
   }
+}
+
+function normalizeAnimeKey(title) {
+  return (title ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[’']/g, "")        // drop apostrophes for matching
+    .replace(/[^a-z0-9]+/g, " ") // collapse punctuation to spaces
+    .trim();
+}
+
+// Only used for UI display — does NOT change your underlying data.
+function prettyAnimeTitle(rawTitle) {
+  const t = (rawTitle ?? "").trim();
+  if (!t) return "Unknown anime";
+
+  const key = normalizeAnimeKey(t);
+  return ANIME_TITLE_OVERRIDES[key] ?? t;
 }
 
 function pickYearString(entry) {
@@ -993,7 +1025,7 @@ function renderList() {
     // Anime
     const animeSpan = document.createElement("span");
     animeSpan.className = "result-anime result-clickable"; // <-- Make clickable
-    animeSpan.textContent = anime;
+    animeSpan.textContent = prettyAnimeTitle(anime);
 
     main.appendChild(titleSpan);
     main.appendChild(document.createElement("br"));
@@ -1032,7 +1064,7 @@ function renderList() {
 
     animeSpan.addEventListener("dblclick", (ev) => {
       ev.stopPropagation();
-      quickSearchFromText(anime);
+      quickSearchFromText(prettyAnimeTitle(anime));
     });
 
     vaSpan.addEventListener("dblclick", (ev) => {
