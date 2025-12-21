@@ -40,17 +40,17 @@ let langButtonsWired = false;
 const SYNC_API_KEY = "";
 
 const ANIME_TITLE_OVERRIDES = {
-  "Fullmetal Alchemist Brotherhood": "Fullmetal Alchemist: Brotherhood",
-  "Howls Moving Castle": "Howl's Moving Castle",
-  "Jojos Bizarre Adventure": "JoJo's Bizarre Adventure",
-  "Kikis Delivery Service": "Kiki's Delivery Service",
-  "Naruto Shippuden": "Naruto: Shippuden",
-  "RIN Daughters of Mnemosyne": "RIN: Daughters of Mnemosyne",
-  "That Time I Got Reincarnated as" : "That Time I Got Reincarnated as a Slime",
-  "The Ancient Magus Bride": "The Ancient Magus' Bride",
-  "Tokyo Ghoul Re": "Tokyo Ghoul:re",
-  "Tokyo Ghoul Root A": "Tokyo Ghoul: Root A",
-  "Wolfs Rain": "Wolf's Rain",
+  "fullmetal alchemist brotherhood": "Fullmetal Alchemist: Brotherhood",
+  "howls moving castle": "Howl's Moving Castle",
+  "jojos bizarre adventure": "JoJo's Bizarre Adventure",
+  "kikis delivery service": "Kiki's Delivery Service",
+  "naruto shippuden": "Naruto: Shippuden",
+  "rin daughters of mnemosyne": "RIN: Daughters of Mnemosyne",
+  "that time i got reincarnated as" : "That Time I Got Reincarnated as a Slime",
+  "the ancient magus bride": "The Ancient Magus' Bride",
+  "tokyo ghoul re": "Tokyo Ghoul:re",
+  "tokyo ghoul root a": "Tokyo Ghoul: Root A",
+  "wolfs rain": "Wolf's Rain",
 }
 
 function isReadOnlyProfile() {
