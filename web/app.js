@@ -200,7 +200,7 @@ function renderAnimeListView() {
 
     const title = document.createElement("div");
     title.className = "result-title";
-    title.textContent = r.anime;
+    title.textContent = prettyAnimeTitle(r.anime);
 
     const actions = document.createElement("div");
     actions.className = "list-row-actions";
@@ -295,30 +295,6 @@ function prettyAnimeTitle(rawTitle) {
 
   const key = normalizeAnimeKey(t);
   return ANIME_TITLE_OVERRIDES[key] ?? t;
-}
-
-function pickYearString(entry) {
-  const y = getField(entry, ["year"], "");
-  const s = String(y || "").trim();
-  return s || "";
-}
-
-function computeAnimeYears(entries) {
-  let engYear = "";
-  let jpnYear = "";
-
-  for (const e of entries) {
-    const y = pickYearString(e);
-    if (!y) continue;
-
-    const src = (e.__srcLang || "").toUpperCase();
-    if (src === "ENG" && !engYear) engYear = y;
-    if (src === "JPN" && !jpnYear) jpnYear = y;
-
-    if (engYear && jpnYear) break;
-  }
-
-  return { engYear, jpnYear };
 }
 
 function wireLanguageButtonsOnce() {
