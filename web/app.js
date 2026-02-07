@@ -462,6 +462,7 @@ function wireLanguageButtonsOnce() {
 }
 
 function markLangSelected(lang) {
+  localStorage.setItem("av_active_lang", lang);
   const engBtn = document.getElementById("langEng");
   const jpnBtn = document.getElementById("langJpn");
   const bothBtn = document.getElementById("langBoth");
@@ -1703,8 +1704,25 @@ window.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    // On launch, open Profile tab (so they must choose)
-    setActiveTab("profile");
-    updateProfileUi();
+    // On launch: restore last profile + language if available (local-first)
+    const saved = loadLocalProfile();
+    if (saved) {
+      activeProfileId = saved.id;
+      activeProfileLabel = saved.label;
+      applyLocalStateNow(activeProfileId);
+      updateProfileUi();
+
+      // Make sure language buttons are wired exactly once
+      wireLanguageButtonsOnce();
+
+      const savedLang = (localStorage.getItem(LS_ACTIVE_LANG) || "ENG").toUpperCase();
+      setActiveTab("search");
+      markLangSelected(savedLang);
+      loadDataFor(savedLang);
+    } else {
+      // No saved profile yet: start on Profile tab
+      setActiveTab("profile");
+      updateProfileUi();
+    }
   })();
 });
