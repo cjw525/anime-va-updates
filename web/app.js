@@ -1588,10 +1588,7 @@ async function loadDataFor(language) {
     } else if (language === "JPN") {
       urls = ["../data/anime_va_jpn.json"];
     } else {
-      urls = [
-        "../data/anime_va_eng.json",
-        "../data/anime_va_jpn.json"
-      ];
+      urls = ["../data/anime_va_eng.json", "../data/anime_va_jpn.json"];
     }
 
     let combined = [];
@@ -1602,21 +1599,13 @@ async function loadDataFor(language) {
       const data = await resp.json();
       const arr = Array.isArray(data) ? data : data.data || [];
 
-      // Figure out the language for THIS file
       let sourceLang = "";
-      if (url.toLowerCase().includes("_eng")) {
-        sourceLang = "ENG";
-      } else if (url.toLowerCase().includes("_jpn")) {
-        sourceLang = "JPN";
-      } else {
-        sourceLang = language; // fallback
-      }
+      if (url.toLowerCase().includes("_eng")) sourceLang = "ENG";
+      else if (url.toLowerCase().includes("_jpn")) sourceLang = "JPN";
+      else sourceLang = language;
 
-      // Tag entries from this file
-      arr.forEach(entry => {
-        if (!entry.language) {
-          entry.language = sourceLang;
-        }
+      arr.forEach((entry) => {
+        if (!entry.language) entry.language = sourceLang;
       });
 
       const srcLang = url.includes("_eng") ? "ENG" : url.includes("_jpn") ? "JPN" : "";
@@ -1630,27 +1619,29 @@ async function loadDataFor(language) {
 
     // Optional: switching DBs also returns to list view
     const layoutEl = document.querySelector(".results-layout");
-    if (layoutEl) {
-      layoutEl.classList.remove("detail-active");
-    }
-    // Fetch remote profile state for seen status (read-only sync v0.1)
+    if (layoutEl) layoutEl.classList.remove("detail-active");
+
+    // --- HYBRID: local first, server optional --------------------------------
     if (!isReadOnlyProfile()) {
-      // Local-first: apply local state immediately so UI is correct instantly
+      // 1) Apply local immediately so UI is correct even if server is asleep/wiped
       applyLocalStateNow(activeProfileId);
 
-      // Then attempt server merge + queued sync in the background
+      // 2) Apply filters + show UI right now (local pass)
+      applyFilters();
+
+      // 3) Attempt background merge from server (server pass)
       fetchProfileState(activeProfileId).then(() => {
         applyFilters();
         renderAnimeListView?.();
         updateSummary?.();
       });
 
+      // 4) Try sending queued updates
       flushQueue(activeProfileId);
     } else {
       activeProfileState = {};
+      applyFilters();
     }
-
-    applyFilters();
 
     const container = document.getElementById("cardsContainer");
     if (container) {
