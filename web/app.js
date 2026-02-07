@@ -591,6 +591,8 @@ function normalizeSearchText(s) {
   out = out.replace(/([ou])u/g, "$1")  // ou -> o, uu -> u
            .replace(/([ou])\1+/g, "$1"); // oo -> o, ooo -> o
 
+  out = out.replace(/[-–—]/g, " ");
+
   // Collapse whitespace
   out = out.trim().split(/\s+/).join(" ");
   return out;
@@ -862,8 +864,18 @@ function applyFilters() {
         return haystackNorm.includes(q);
       }
 
-      // Multi-word: require all query tokens to appear (order-agnostic)
-      return qTokens.every((t) => hayTokens.has(t));
+      // Multi-word: exact match for earlier tokens, prefix match for the last token
+      const hayArr = haystackNorm.split(" ");
+      const haySet = new Set(hayArr);
+      const lastIdx = qTokens.length - 1;
+
+      return qTokens.every((t, i) => {
+        if (!t) return true;
+        if (i === lastIdx) {
+          return hayArr.some((ht) => ht.startsWith(t));
+        }
+        return haySet.has(t);
+      });
     });
   }
 
@@ -1080,9 +1092,26 @@ function updateSuggestions(q) {
           matches.push(cand);
         }
       } else {
-        // multi-word: bag-of-words against this label
-        const labelTokens = new Set(labelNorm.split(" "));
-        if (qTokens.every((t) => labelTokens.has(t))) {
+        // multi-word: all earlier tokens must match exactly;
+        // the last token can be a prefix of any label token (so "my d" suggests "My Dress-Up...")
+        const labelTokenArr = labelNorm.split(" ");
+        const labelTokenSet = new Set(labelTokenArr);
+
+        const lastIdx = qTokens.length - 1;
+
+        const ok = qTokens.every((t, i) => {
+          if (!t) return true;
+
+          if (i === lastIdx) {
+            // current word: allow prefix match
+            return labelTokenArr.some((lt) => lt.startsWith(t));
+          }
+
+          // previous words: exact token match
+          return labelTokenSet.has(t);
+        });
+
+        if (ok) {
           matches.push(cand);
         }
       }
