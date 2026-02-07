@@ -50,6 +50,100 @@ let langButtonsWired = false;
 
 const SYNC_API_KEY = "";
 
+// --- Local persistence (hybrid mode) ----------------------------------------
+
+const LS_ACTIVE_PROFILE_ID = "av_active_profile_id";
+const LS_ACTIVE_PROFILE_LABEL = "av_active_profile_label";
+const LS_ACTIVE_LANG = "av_active_lang";
+
+function lsStateKey(profileId) {
+  return `av_profile_state__${profileId}`;
+}
+
+function lsQueueKey(profileId) {
+  return `av_profile_queue__${profileId}`;
+}
+
+function loadJson(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function saveJson(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {
+    console.warn("Failed to save local state", e);
+  }
+}
+
+function loadLocalProfile() {
+  const id = (localStorage.getItem(LS_ACTIVE_PROFILE_ID) || "").trim();
+  const label = (localStorage.getItem(LS_ACTIVE_PROFILE_LABEL) || "").trim();
+  return id ? { id, label: label || id } : null;
+}
+
+function saveLocalProfile(profileId, profileLabel) {
+  localStorage.setItem(LS_ACTIVE_PROFILE_ID, profileId);
+  localStorage.setItem(LS_ACTIVE_PROFILE_LABEL, profileLabel || profileId);
+}
+
+function loadLocalProfileState(profileId) {
+  return loadJson(lsStateKey(profileId), { entries: {} });
+}
+
+function saveLocalProfileState(profileId, stateObj) {
+  saveJson(lsStateKey(profileId), stateObj);
+}
+
+function loadLocalQueue(profileId) {
+  return loadJson(lsQueueKey(profileId), []);
+}
+
+function saveLocalQueue(profileId, queue) {
+  saveJson(lsQueueKey(profileId), queue);
+}
+
+function enqueueUpdate(profileId, update) {
+  const q = loadLocalQueue(profileId);
+  q.push(update);
+  saveLocalQueue(profileId, q);
+}
+
+function applyLocalStateNow(profileId) {
+  if (!profileId) return;
+  const local = loadLocalProfileState(profileId);
+  activeProfileState = local.entries || {};
+}
+
+function mergeStates(localEntries, remoteEntries) {
+  const merged = { ...(localEntries || {}) };
+
+  for (const [key, remoteVal] of Object.entries(remoteEntries || {})) {
+    const localVal = merged[key];
+
+    // If no local entry, take remote
+    if (!localVal) {
+      merged[key] = remoteVal;
+      continue;
+    }
+
+    const lt = String(localVal.updated || "");
+    const rt = String(remoteVal.updated || "");
+
+    // Keep whichever is newer
+    if (rt && (!lt || rt > lt)) {
+      merged[key] = remoteVal;
+    }
+  }
+
+  return merged;
+}
+
 const ANIME_TITLE_OVERRIDES = {
   "fullmetal alchemist brotherhood": "Fullmetal Alchemist: Brotherhood",
   "howls moving castle": "Howl's Moving Castle",
@@ -536,23 +630,72 @@ async function fetchProfileState(profileId) {
   try {
     const url = `${SYNC_API_BASE}/profiles/${encodeURIComponent(profileId)}/state`;
     const headers = {};
-    if (SYNC_API_KEY) {
-      headers["X-API-Key"] = SYNC_API_KEY;
-    }
+    if (SYNC_API_KEY) headers["X-API-Key"] = SYNC_API_KEY;
 
     const resp = await fetch(url, { headers });
     if (!resp.ok) {
-      console.error("Failed to load profile state", resp.status);
-      activeProfileState = {};
+      console.warn("Failed to load profile state (server). Using local only.", resp.status);
       return;
     }
 
     const data = await resp.json();
-    activeProfileState = data.entries || {};
-    console.log("Loaded profile state for", profileId, activeProfileState);
+    const remoteEntries = data.entries || {};
+
+    // Merge remote into local, then persist merged
+    const localObj = loadLocalProfileState(profileId);
+    const mergedEntries = mergeStates(localObj.entries, remoteEntries);
+
+    activeProfileState = mergedEntries;
+    saveLocalProfileState(profileId, { entries: mergedEntries });
+
+    console.log("Merged profile state for", profileId, "entries:", Object.keys(mergedEntries).length);
   } catch (err) {
-    console.error("Error fetching profile state", err);
-    activeProfileState = {};
+    console.warn("Error fetching profile state. Using local only.", err);
+  }
+}
+
+async function flushQueue(profileId) {
+  if (!profileId || isReadOnlyProfile()) return true;
+
+  const q = loadLocalQueue(profileId);
+  if (!q.length) return true;
+
+  // Batch up to 50 at a time so payload doesn't explode
+  const batch = q.slice(0, 50);
+
+  const payload = {
+    device_id: "mobile-pwa",
+    updates: batch
+  };
+
+  const headers = { "Content-Type": "application/json" };
+  if (SYNC_API_KEY) headers["X-API-Key"] = SYNC_API_KEY;
+
+  try {
+    const resp = await fetch(`${SYNC_API_BASE}/profiles/${profileId}/entries`, {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify(payload)
+    });
+
+    if (!resp.ok) {
+      console.warn("Queue flush failed:", await resp.text());
+      return false;
+    }
+
+    // Success: remove flushed items
+    const remaining = q.slice(batch.length);
+    saveLocalQueue(profileId, remaining);
+
+    // If there’s more, try again (but don’t spiral forever)
+    if (remaining.length) {
+      // fire-and-forget next chunk
+      setTimeout(() => flushQueue(profileId), 0);
+    }
+    return true;
+  } catch (e) {
+    console.warn("Queue flush exception:", e);
+    return false;
   }
 }
 
@@ -563,46 +706,38 @@ async function updateProfileEntry(entry, updates) {
   }
 
   const key = makeEntryKey(entry);
+  const nowIso = new Date().toISOString();
 
-  const payload = {
-    device_id: "mobile-pwa",
-    updates: [
-      {
-        key,
-        seen: updates.seen ?? false,
-        tbr: updates.tbr ?? false,
-        updated: new Date().toISOString()
-      }
-    ]
+  const newState = {
+    seen: !!(updates.seen ?? false),
+    tbr: !!(updates.tbr ?? false),
+    updated: nowIso,
+    updated_by: "mobile-pwa"
   };
 
-  const headers = { "Content-Type": "application/json" };
-  if (SYNC_API_KEY) headers["X-API-Key"] = SYNC_API_KEY;
+  // 1) Update memory immediately (UI correctness)
+  activeProfileState[key] = newState;
 
-  const resp = await fetch(
-    `${SYNC_API_BASE}/profiles/${activeProfileId}/entries`,
-    {
-      method: "PATCH",
-      headers,
-      body: JSON.stringify(payload)
-    }
-  );
+  // 2) Persist locally immediately (reopen-proof)
+  const localObj = loadLocalProfileState(activeProfileId);
+  const merged = { ...(localObj.entries || {}) };
+  merged[key] = newState;
+  saveLocalProfileState(activeProfileId, { entries: merged });
 
-  if (!resp.ok) {
-    console.error("Failed to update profile entry", await resp.text());
-    return false;
-  }
+  // 3) Queue for server sync (retries later)
+  enqueueUpdate(activeProfileId, {
+    key,
+    seen: newState.seen,
+    tbr: newState.tbr,
+    updated: newState.updated
+  });
 
-  // Optimistic local update
-  activeProfileState[key] = {
-    seen: payload.updates[0].seen,
-    tbr: payload.updates[0].tbr,
-    updated: payload.updates[0].updated,
-    updated_by: payload.device_id
-  };
+  // 4) Try to flush (don’t block the UI if it fails)
+  flushQueue(activeProfileId);
 
   return true;
 }
+
 
 // No media type in mobile JSON yet; leave this as a stub.
 function normalizeType(valueRaw) {
@@ -1500,7 +1635,17 @@ async function loadDataFor(language) {
     }
     // Fetch remote profile state for seen status (read-only sync v0.1)
     if (!isReadOnlyProfile()) {
-      await fetchProfileState(activeProfileId);
+      // Local-first: apply local state immediately so UI is correct instantly
+      applyLocalStateNow(activeProfileId);
+
+      // Then attempt server merge + queued sync in the background
+      fetchProfileState(activeProfileId).then(() => {
+        applyFilters();
+        renderAnimeListView?.();
+        updateSummary?.();
+      });
+
+      flushQueue(activeProfileId);
     } else {
       activeProfileState = {};
     }
@@ -1554,7 +1699,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
         activeProfileId = profileId;
         activeProfileLabel = btn.textContent.trim();
-        activeProfileState = {};
+        saveLocalProfile(activeProfileId, activeProfileLabel);
+        applyLocalStateNow(activeProfileId);
         updateProfileUi();
 
         // Make sure language buttons are wired exactly once
