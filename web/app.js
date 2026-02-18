@@ -264,27 +264,6 @@ async function bulkSetAnimeTbr(entries, tbrValue) {
   renderAnimeListView();
 }
 
-async function ensureImageMapsLoaded() {
-  if (IMAGE_MAP_CHAR !== null && IMAGE_MAP_VA !== null) return;
-
-  // default to empty maps on failure, so we fall back safely
-  IMAGE_MAP_CHAR = {};
-  IMAGE_MAP_VA = {};
-
-  try {
-    const [charResp, vaResp] = await Promise.all([
-      fetch(IMAGE_MAP_CHAR_URL, { cache: "no-store" }),
-      fetch(IMAGE_MAP_VA_URL, { cache: "no-store" }),
-    ]);
-
-    if (charResp.ok) IMAGE_MAP_CHAR = await charResp.json();
-    if (vaResp.ok) IMAGE_MAP_VA = await vaResp.json();
-  } catch (e) {
-    // Non-fatal: fall back to eng/jpn folders
-    // (Optional) console.debug("Image map load failed; using legacy paths.", e);
-  }
-}
-
 function resolveStoreFilename(filename, kind /* "char" | "va" */) {
   if (!filename) return "";
 
@@ -750,6 +729,10 @@ function normalizeType(valueRaw) {
   return "";
 }
 
+function looksLikeHashFilename(name) {
+  return /^[0-9a-f]{64}\.(png|jpg|jpeg|webp)$/i.test((name || "").trim());
+}
+
 function buildLocalImagePath(raw, entry, kind = "") {
   const trimmed = (raw || "").trim();
   if (!trimmed) return "";
@@ -769,6 +752,13 @@ function buildLocalImagePath(raw, entry, kind = "") {
     .replace(/^images\//i, "")
     .replace(/^eng\//i, "")
     .replace(/^jpn\//i, "");
+
+  // NEW: If the DB already gives us a hash filename, it's always in /store/
+  if (looksLikeHashFilename(filename)) {
+    return `${IMAGE_BASE_URL}/${IMAGE_STORE_FOLDER}/${filename}?v=${encodeURIComponent(
+      IMAGE_VERSION
+    )}`;
+  }
 
   // Prefer store/ mapping if available
   const storeName = resolveStoreFilename(filename, kind);
@@ -791,10 +781,9 @@ function buildLocalImagePath(raw, entry, kind = "") {
 }
 
 function getCharacterImageUrl(entry) {
-  const raw = getField(entry, ["characterImage"], "").trim();
+  const raw = getField(entry, ["characterImage", "character_image", "character_image_path"], "").trim();
   if (!raw) return "";
 
-  // direct URL passthrough
   if (
     raw.startsWith("http://") ||
     raw.startsWith("https://") ||
@@ -808,10 +797,9 @@ function getCharacterImageUrl(entry) {
 }
 
 function getVaImageUrl(entry) {
-  const raw = getField(entry, ["voiceActorImage"], "").trim();
+  const raw = getField(entry, ["voiceActorImage", "voice_actor_image", "voice_actor_image_path"], "").trim();
   if (!raw) return "";
 
-  // direct URL passthrough
   if (
     raw.startsWith("http://") ||
     raw.startsWith("https://") ||
@@ -1696,9 +1684,6 @@ async function loadDataFor(language) {
 
 window.addEventListener("DOMContentLoaded", () => {
   (async () => {
-    // Load image maps once so first render can use /store/ when available
-    await ensureImageMapsLoaded();
-
     hookControls();
 
     const tabProfile = document.getElementById("tabProfile");
@@ -1717,9 +1702,6 @@ window.addEventListener("DOMContentLoaded", () => {
       btn.addEventListener("click", async () => {
         const profileId = btn.getAttribute("data-profile");
         if (!profileId) return;
-
-        // Ensure maps are loaded even if someone somehow clicks before the await completes
-        await ensureImageMapsLoaded();
 
         activeProfileId = profileId;
         activeProfileLabel = btn.textContent.trim();
