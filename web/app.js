@@ -26,7 +26,7 @@ let currentPage = 1;
 // For local dev use: "http://localhost:8000"
 const SYNC_API_BASE = "https://anime-va-profile-server.onrender.com";
 const IMAGE_BASE_URL = "https://raw.githubusercontent.com/cjw525/anime-va-images/main";
-const IMAGE_VERSION = "2025-12-12_13-33-40"; // for cache-busting if needed
+const IMAGE_VERSION = "2026-02-17_19-57-01"; // for cache-busting if needed
 
 const IMAGE_STORE_FOLDER = "store";
 const IMAGE_MAP_CHAR_URL = `${IMAGE_BASE_URL}/maps/image_map_char.json?v=${encodeURIComponent(
@@ -583,18 +583,22 @@ function normalizeSeen(valueRaw) {
 
 function normalizeSearchText(s) {
   if (!s) return "";
-  // Strip accents (NFKD decompose + remove combining marks)
-  let out = s.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
-  out = out.toLowerCase();
 
-  // Optional: basic romaji long-vowel collapse
-  out = out.replace(/([ou])u/g, "$1")  // ou -> o, uu -> u
-           .replace(/([ou])\1+/g, "$1"); // oo -> o, ooo -> o
+  let out = String(s)
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, ""); // remove combining marks
 
-  out = out.replace(/[-–—]/g, " ");
+  out = out.toLowerCase(); // closest to Python casefold in JS
 
-  // Collapse whitespace
+  out = out.replace(/ß/g, "ss")
+           .replace(/æ/g, "ae")
+           .replace(/œ/g, "oe");
+
   out = out.trim().split(/\s+/).join(" ");
+
+  out = out.replace(/([ou])u/g, "$1")
+           .replace(/([ou])\1+/g, "$1");
+
   return out;
 }
 
@@ -740,7 +744,6 @@ async function updateProfileEntry(entry, updates) {
 
   return true;
 }
-
 
 // No media type in mobile JSON yet; leave this as a stub.
 function normalizeType(valueRaw) {
