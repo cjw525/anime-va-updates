@@ -26,7 +26,7 @@ let currentPage = 1;
 // For local dev use: "http://localhost:8000"
 const SYNC_API_BASE = "https://anime-va-profile-server.onrender.com";
 const IMAGE_BASE_URL = "https://raw.githubusercontent.com/cjw525/anime-va-images/main";
-const IMAGE_VERSION = "2026-02-24_15-44-00"; // for cache-busting if needed
+const IMAGE_VERSION = "2026-02-24_18-55-00"; // for cache-busting if needed
 
 // Later we'll let users pick this; for now, just "jades"
 let activeProfileId = null;
@@ -1424,6 +1424,16 @@ function selectEntry(entry) {
     img.alt = `Character: ${character}`;
     img.loading = "lazy";
 
+    img.onerror = () => {
+      console.error("[IMG FAIL] char", {
+        charUrl,
+        rawField: getField(entry, ["characterImage","character_image","character_image_path"], ""),
+        entryLang: entry.language,
+        srcLang: entry.__srcLang,
+        uiLang: window.AV_LANG,
+      });
+    };
+
     const label = document.createElement("div");
     label.className = "detail-image-label";
     label.textContent = "Character";
@@ -1441,6 +1451,16 @@ function selectEntry(entry) {
     img.src = vaUrl;
     img.alt = `Voice actor: ${va}`;
     img.loading = "lazy";
+
+    img.onerror = () => {
+      console.error("[IMG FAIL] va", {
+        vaUrl,
+        rawField: getField(entry, ["voiceActorImage","voice_actor_image","voice_actor_image_path"], ""),
+        entryLang: entry.language,
+        srcLang: entry.__srcLang,
+        uiLang: window.AV_LANG,
+      });
+    };
 
     const label = document.createElement("div");
     label.className = "detail-image-label";
