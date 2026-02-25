@@ -420,6 +420,11 @@ function wireLanguageButtonsOnce() {
 
 function markLangSelected(lang) {
   localStorage.setItem("av_active_lang", lang);
+
+  if (lang == "ENG")window.AV_LANG = "eng";
+  else if (lang == "JPN")window.AV_LANG = "jpn";
+  else if (lang == "BOTH")window.AV_LANG = "both";
+
   const engBtn = document.getElementById("langEng");
   const jpnBtn = document.getElementById("langJpn");
   const bothBtn = document.getElementById("langBoth");
@@ -727,11 +732,19 @@ function buildLocalImagePath(raw, entry, kind = "") {
     .replace(/^eng\//i, "")
     .replace(/^jpn\//i, "");
 
-  // Legacy per-language fallback
-  const lang = (entry.language || "").toString().toLowerCase();
+  // Decide folder
+  const uiLang = (window.AV_LANG || "eng").toString().toLowerCase();
+
   let folder = "eng";
-  if (lang.includes("jpn") || lang === "jp") {
+
+  if (uiLang === "jpn" || uiLang === "jp") {
     folder = "jpn";
+  } else if (uiLang === "both") {
+    // Prefer your explicit tag from loadDataFor()
+    const src = (entry.__srcLang || entry.language || "").toString().toLowerCase();
+    folder = src.startsWith("jpn") || src === "jp" ? "jpn" : "eng";
+  } else {
+    folder = "eng";
   }
 
   return `${IMAGE_BASE_URL}/${folder}/${filename}?v=${encodeURIComponent(
