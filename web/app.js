@@ -26,18 +26,7 @@ let currentPage = 1;
 // For local dev use: "http://localhost:8000"
 const SYNC_API_BASE = "https://anime-va-profile-server.onrender.com";
 const IMAGE_BASE_URL = "https://raw.githubusercontent.com/cjw525/anime-va-images/main";
-const IMAGE_VERSION = "2026-02-17_20-24-00"; // for cache-busting if needed
-
-const IMAGE_STORE_FOLDER = "store";
-const IMAGE_MAP_CHAR_URL = `${IMAGE_BASE_URL}/maps/image_map_char.json?v=${encodeURIComponent(
-  IMAGE_VERSION
-)}`;
-const IMAGE_MAP_VA_URL = `${IMAGE_BASE_URL}/maps/image_map_va.json?v=${encodeURIComponent(
-  IMAGE_VERSION
-)}`;
-
-let IMAGE_MAP_CHAR = null; // null = not loaded yet
-let IMAGE_MAP_VA = null;   // null = not loaded yet
+const IMAGE_VERSION = "2026-02-24_15-44-00"; // for cache-busting if needed
 
 // Later we'll let users pick this; for now, just "jades"
 let activeProfileId = null;
@@ -262,17 +251,6 @@ async function bulkSetAnimeTbr(entries, tbrValue) {
 
   applyFilters();
   renderAnimeListView();
-}
-
-function resolveStoreFilename(filename, kind /* "char" | "va" */) {
-  if (!filename) return "";
-
-  // If maps aren't loaded yet, we can't resolve — caller should fall back.
-  if (IMAGE_MAP_CHAR === null || IMAGE_MAP_VA === null) return "";
-
-  if (kind === "char") return IMAGE_MAP_CHAR[filename] || "";
-  if (kind === "va") return IMAGE_MAP_VA[filename] || "";
-  return "";
 }
 
 function renderAnimeListView() {
@@ -729,10 +707,6 @@ function normalizeType(valueRaw) {
   return "";
 }
 
-function looksLikeHashFilename(name) {
-  return /^[0-9a-f]{64}\.(png|jpg|jpeg|webp)$/i.test((name || "").trim());
-}
-
 function buildLocalImagePath(raw, entry, kind = "") {
   const trimmed = (raw || "").trim();
   if (!trimmed) return "";
@@ -752,21 +726,6 @@ function buildLocalImagePath(raw, entry, kind = "") {
     .replace(/^images\//i, "")
     .replace(/^eng\//i, "")
     .replace(/^jpn\//i, "");
-
-  // NEW: If the DB already gives us a hash filename, it's always in /store/
-  if (looksLikeHashFilename(filename)) {
-    return `${IMAGE_BASE_URL}/${IMAGE_STORE_FOLDER}/${filename}?v=${encodeURIComponent(
-      IMAGE_VERSION
-    )}`;
-  }
-
-  // Prefer store/ mapping if available
-  const storeName = resolveStoreFilename(filename, kind);
-  if (storeName) {
-    return `${IMAGE_BASE_URL}/${IMAGE_STORE_FOLDER}/${storeName}?v=${encodeURIComponent(
-      IMAGE_VERSION
-    )}`;
-  }
 
   // Legacy per-language fallback
   const lang = (entry.language || "").toString().toLowerCase();
