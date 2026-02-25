@@ -26,7 +26,7 @@ let currentPage = 1;
 // For local dev use: "http://localhost:8000"
 const SYNC_API_BASE = "https://anime-va-profile-server.onrender.com";
 const IMAGE_BASE_URL = "https://raw.githubusercontent.com/cjw525/anime-va-images/main";
-const IMAGE_VERSION = "2026-02-24_18-55-00"; // for cache-busting if needed
+const IMAGE_VERSION = "2026-02-24_19-05-08"; // for cache-busting if needed
 
 // Later we'll let users pick this; for now, just "jades"
 let activeProfileId = null;
@@ -1732,3 +1732,4 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   })();
 });
+
